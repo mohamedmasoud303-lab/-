@@ -115,7 +115,7 @@ const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ isOpen, onClose, reco
                         <label className="text-sm font-medium">الوحدة</label>
                         <select 
                             name="unitId" 
-                            value={data.unitId} 
+                            value={data.unitId || ''} 
                             onChange={handleChange} 
                             required
                             className="w-full p-2 border rounded-md"
@@ -132,7 +132,7 @@ const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ isOpen, onClose, reco
                         <input 
                             name="requestDate" 
                             type="date" 
-                            value={data.requestDate} 
+                            value={data.requestDate || ''} 
                             onChange={handleChange} 
                             required 
                             className="w-full p-2 border rounded-md"
@@ -144,7 +144,7 @@ const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ isOpen, onClose, reco
                     <label className="text-sm font-medium">الوصف</label>
                     <textarea 
                         name="description" 
-                        value={data.description} 
+                        value={data.description || ''} 
                         onChange={handleChange} 
                         required 
                         rows={3} 
@@ -158,7 +158,7 @@ const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ isOpen, onClose, reco
                         <label className="text-sm font-medium">الحالة</label>
                         <select 
                             name="status" 
-                            value={data.status} 
+                            value={data.status || 'NEW'} 
                             onChange={handleChange}
                             className="w-full p-2 border rounded-md"
                         >
@@ -183,7 +183,7 @@ const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ isOpen, onClose, reco
                         <label className="text-sm font-medium">يتحملها</label>
                         <select 
                             name="chargedTo" 
-                            value={data.chargedTo} 
+                            value={data.chargedTo || 'OWNER'} 
                             onChange={handleChange}
                             className="w-full p-2 border rounded-md"
                         >

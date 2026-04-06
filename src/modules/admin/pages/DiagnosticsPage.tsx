@@ -10,20 +10,87 @@ import {
   ShieldCheck,
   Zap,
   LayoutList,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Search,
+  Bot,
+  Clock,
+  Terminal
 } from 'lucide-react';
 import { useApp } from '../../../contexts/AppContext';
 import { dbEngine } from '../../../services/api/db';
+import { supabase } from '../../../lib/supabase';
 import { formatDateTime } from '../../../utils/helpers';
 import Card from '../../../components/ui/Card';
 import PageHeader from '../../../components/ui/PageHeader';
 import StatusPill from '../../../components/ui/StatusPill';
+import { PiAgentService } from '../../../services/integrations/piAgentService';
+import { SelfEvolutionManager } from '../../../ai/evolution/manager';
 
 const Diagnostics: React.FC = () => {
   const { currentUser } = useApp();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [lastRebuild, setLastRebuild] = useState<string | null>(null);
+  const [aiAuditResult, setAiAuditResult] = useState<string | null>(null);
+  const [auditing, setAuditing] = useState(false);
+  const [lastTasks, setLastTasks] = useState<any[]>([]);
+  const [evolutionStatus, setEvolutionStatus] = useState<string>('IDLE');
+  const [evolving, setEvolving] = useState(false);
+
+  const runEvolution = async () => {
+    setEvolving(true);
+    setEvolutionStatus('EVOLVING');
+    try {
+      const manager = new SelfEvolutionManager();
+      await manager.startEvolutionCycle();
+      await fetchAiLogs();
+      setEvolutionStatus('COMPLETED');
+    } catch (error) {
+      console.error('Evolution failed:', error);
+      setEvolutionStatus('FAILED');
+    } finally {
+      setEvolving(false);
+      setTimeout(() => setEvolutionStatus('IDLE'), 5000);
+    }
+  };
+
+  const fetchAiLogs = async () => {
+    const { data } = await supabase
+      .from('auditLog')
+      .select('*')
+      .in('action', ['SEND_REMINDER', 'DAILY_CRON', 'EVOLUTION_CYCLE', 'CODE_HEALTH_AUDIT', 'SECURITY_SCAN', 'PERFORMANCE_CHECK', 'DEPENDENCY_UPGRADE', 'SELF_HEALING'])
+      .order('timestamp', { ascending: false })
+      .limit(10);
+    setLastTasks(data || []);
+  };
+
+  useEffect(() => {
+    fetchAiLogs();
+  }, []);
+
+  const runAiAudit = async () => {
+    setAuditing(true);
+    try {
+      const piService = PiAgentService.getInstance();
+      const result = await piService.chat(`
+        Perform a high-level code audit of the Rentrix ERP project.
+        Focus on:
+        1. Financial transaction integrity (Supabase RPCs usage).
+        2. Data fetching performance (React Query implementation).
+        3. Security (RLS policies and authentication).
+        4. Technical debt and code organization.
+        
+        Provide a concise summary with actionable recommendations.
+      `);
+      setAiAuditResult(result || null);
+    } catch (error) {
+      console.error('AI Audit failed:', error);
+      setAiAuditResult('Failed to perform AI audit. Please check your connection.');
+    } finally {
+      setAuditing(false);
+    }
+  };
 
   const fetchStats = async () => {
     setLoading(true);
@@ -196,7 +263,7 @@ const Diagnostics: React.FC = () => {
         </button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="p-6 border-r-4 border-r-primary">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-primary/10 rounded-xl text-primary">
@@ -232,7 +299,31 @@ const Diagnostics: React.FC = () => {
               <p className="text-sm text-muted-foreground">حالة النظام</p>
               <div className="flex items-center gap-2">
                 <StatusPill status="ACTIVE">متصل ونشط</StatusPill>
-                <span className="text-xs text-muted-foreground">v1.2.0-stable</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 border-r-4 border-r-indigo-500">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-500">
+              <Bot className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">حالة العميل الذكي</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <StatusPill status="ACTIVE">مستعد</StatusPill>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Evolution: {evolutionStatus}</span>
+                </div>
+                <button 
+                  onClick={runEvolution}
+                  disabled={evolving}
+                  className="p-1.5 bg-indigo-500/10 text-indigo-500 rounded hover:bg-indigo-500/20 disabled:opacity-50 transition-all"
+                  title="تحفيز التطور الذاتي"
+                >
+                  <RefreshCw className={`w-4 h-4 ${evolving ? 'animate-spin' : ''}`} />
+                </button>
               </div>
             </div>
           </div>
@@ -240,6 +331,70 @@ const Diagnostics: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h3 className="font-bold">تدقيق الكود بالذكاء الاصطناعي (AI Code Audit)</h3>
+            </div>
+            <button 
+              onClick={runAiAudit}
+              disabled={auditing}
+              className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all disabled:opacity-50"
+            >
+              {auditing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              {auditing ? 'جاري التدقيق...' : 'بدء التدقيق الشامل'}
+            </button>
+          </div>
+
+          {aiAuditResult ? (
+            <div className="p-6 bg-muted/30 rounded-xl border border-border whitespace-pre-wrap text-sm leading-relaxed">
+              <div className="flex items-center gap-2 mb-4 text-primary font-bold">
+                <ShieldCheck className="w-5 h-5" />
+                تقرير التدقيق الذكي (Powered by pi-coding-agent)
+              </div>
+              {aiAuditResult}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+              <Sparkles className="w-12 h-12 mb-4 opacity-20" />
+              <p>استخدم محرك pi-coding-agent لتحليل جودة الكود واكتشاف الثغرات الأمنية.</p>
+            </div>
+          )}
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <div className="flex items-center gap-2 mb-6">
+            <Terminal className="w-5 h-5 text-primary" />
+            <h3 className="font-bold">سجل العمليات الذاتية والتطوير (Autonomous & Evolution Logs)</h3>
+          </div>
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+            {lastTasks.length > 0 ? lastTasks.map((task, idx) => (
+              <div key={idx} className="p-4 bg-muted/30 rounded-lg border border-border flex items-start gap-4">
+                <div className={`p-2 rounded ${
+                  task.action.includes('EVOLUTION') || task.action.includes('AUDIT') || task.action.includes('SCAN') || task.action.includes('CHECK') || task.action.includes('UPGRADE') || task.action.includes('HEALING')
+                    ? 'bg-indigo-500/10 text-indigo-500'
+                    : 'bg-primary/10 text-primary'
+                }`}>
+                  {task.action === 'DAILY_CRON' ? <Clock className="w-4 h-4" /> : 
+                   task.action.includes('HEALING') ? <Zap className="w-4 h-4" /> :
+                   task.action.includes('SCAN') ? <ShieldCheck className="w-4 h-4" /> :
+                   <Bot className="w-4 h-4" />}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-xs uppercase tracking-wider">{task.action.replace(/_/g, ' ')}</span>
+                    <span className="text-[10px] text-muted-foreground">{formatDateTime(new Date(task.timestamp).toISOString())}</span>
+                  </div>
+                  <p className="text-sm">{task.details}</p>
+                </div>
+              </div>
+            )) : (
+              <div className="text-center py-8 text-muted-foreground italic">لا توجد عمليات مسجلة حالياً.</div>
+            )}
+          </div>
+        </Card>
+
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Database className="w-5 h-5 text-primary" />

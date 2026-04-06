@@ -103,7 +103,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                             <label className="text-sm font-medium">الوحدة</label>
                             <select 
                                 name="unitId" 
-                                value={data.unitId} 
+                                value={data.unitId || ''} 
                                 onChange={handleChange} 
                                 required
                                 disabled={isLoading}
@@ -127,7 +127,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                             <label className="text-sm font-medium">المستأجر</label>
                             <select 
                                 name="tenantId" 
-                                value={data.tenantId} 
+                                value={data.tenantId || ''} 
                                 onChange={handleChange} 
                                 required
                                 disabled={isLoading}
@@ -145,7 +145,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                             <input 
                                 name="rent" 
                                 type="number" 
-                                value={data.rent} 
+                                value={data.rent ?? ''} 
                                 onChange={handleChange} 
                                 placeholder="0.00" 
                                 required 
@@ -176,7 +176,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                                 type="number" 
                                 min="1" 
                                 max="28" 
-                                value={data.dueDay} 
+                                value={data.dueDay ?? ''} 
                                 onChange={handleChange} 
                                 required 
                                 disabled={isLoading}
@@ -189,7 +189,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                             <input 
                                 name="start" 
                                 type="date" 
-                                value={data.start} 
+                                value={data.start || ''} 
                                 onChange={handleStartDateChange} 
                                 required 
                                 disabled={isLoading}
@@ -202,7 +202,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                             <input 
                                 name="end" 
                                 type="date" 
-                                value={data.end} 
+                                value={data.end || ''} 
                                 onChange={handleChange} 
                                 required 
                                 disabled={isLoading}
@@ -215,7 +215,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                             <input 
                                 name="deposit" 
                                 type="number" 
-                                value={data.deposit} 
+                                value={data.deposit ?? ''} 
                                 onChange={handleChange} 
                                 placeholder="0.00" 
                                 disabled={isLoading}
@@ -227,7 +227,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ isOpen, onClose, contract, 
                             <label className="text-sm font-medium">الحالة</label>
                             <select 
                                 name="status" 
-                                value={data.status} 
+                                value={data.status || 'ACTIVE'} 
                                 onChange={handleChange}
                                 disabled={isLoading}
                                 className="w-full p-2 border rounded-md"

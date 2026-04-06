@@ -129,7 +129,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ isOpen, onClose, mission }) =
                     <label className="text-sm font-medium block mb-1">الحالة</label>
                     <select 
                         name="status" 
-                        value={data.status} 
+                        value={data.status || 'PLANNED'} 
                         onChange={handleChange}
                         className="w-full p-2 border rounded-md"
                     >

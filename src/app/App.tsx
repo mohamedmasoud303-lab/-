@@ -4,6 +4,7 @@ import { useApp } from '../contexts/AppContext';
 import AppShell from '../components/layout/AppShell';
 import Login from '../modules/auth/pages/LoginPage';
 import { Toaster } from 'react-hot-toast';
+import RentrixAiAssistant from '../components/RentrixAiAssistant';
 
 // Lazy load pages for performance
 const Dashboard = React.lazy(() => import('../modules/dashboard/pages/DashboardPage'));
@@ -74,6 +75,7 @@ const App: React.FC = () => {
           )}
         </Routes>
       </React.Suspense>
+      {user && <RentrixAiAssistant />}
     </>
   );
 };

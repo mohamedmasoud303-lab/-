@@ -75,7 +75,7 @@ const UtilityServiceForm: React.FC<UtilityServiceFormProps> = ({ isOpen, onClose
                         <label className="text-xs font-bold">نوع الخدمة</label>
                         <select 
                             className="w-full p-2 border rounded-md"
-                            value={formData.serviceType}
+                            value={formData.serviceType || 'WATER'}
                             onChange={e => setFormData({ ...formData, serviceType: e.target.value as any })}
                             required
                         >
@@ -92,7 +92,7 @@ const UtilityServiceForm: React.FC<UtilityServiceFormProps> = ({ isOpen, onClose
                         <input 
                             type="month"
                             className="w-full p-2 border rounded-md"
-                            value={formData.billingPeriod}
+                            value={formData.billingPeriod || ''}
                             onChange={e => setFormData({ ...formData, billingPeriod: e.target.value })}
                             required
                         />
@@ -105,7 +105,7 @@ const UtilityServiceForm: React.FC<UtilityServiceFormProps> = ({ isOpen, onClose
                         <input 
                             type="date"
                             className="w-full p-2 border rounded-md"
-                            value={formData.dueDate}
+                            value={formData.dueDate || ''}
                             onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
                             required
                         />
@@ -116,7 +116,7 @@ const UtilityServiceForm: React.FC<UtilityServiceFormProps> = ({ isOpen, onClose
                             type="number"
                             step="0.001"
                             className="w-full p-2 border rounded-md"
-                            value={formData.amount}
+                            value={formData.amount ?? ''}
                             onChange={e => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
                             required
                         />
@@ -128,7 +128,7 @@ const UtilityServiceForm: React.FC<UtilityServiceFormProps> = ({ isOpen, onClose
                         <label className="text-xs font-bold">الحالة</label>
                         <select 
                             className="w-full p-2 border rounded-md"
-                            value={formData.status}
+                            value={formData.status || 'PENDING'}
                             onChange={e => setFormData({ ...formData, status: e.target.value as any })}
                             required
                         >
@@ -141,7 +141,7 @@ const UtilityServiceForm: React.FC<UtilityServiceFormProps> = ({ isOpen, onClose
                         <label className="text-xs font-bold">الطرف المسؤول</label>
                         <select 
                             className="w-full p-2 border rounded-md"
-                            value={formData.responsibleParty}
+                            value={formData.responsibleParty || 'TENANT'}
                             onChange={e => setFormData({ ...formData, responsibleParty: e.target.value as any })}
                             required
                         >
