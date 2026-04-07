@@ -1,18 +1,27 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../../contexts/AppContext';
 import PageHeader from '../../../components/ui/PageHeader';
 import Card from '../../../components/ui/Card';
 import ExecutiveKpiCard from '../../../components/ui/ExecutiveKpiCard';
-import { ArrowLeft, Building, Home, DollarSign, FileText, Wrench, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Building, Home, DollarSign, FileText, Wrench, AlertCircle, PlusCircle } from 'lucide-react';
 import { formatCurrency } from '../../../utils/helpers';
 import StatusPill from '../../../components/ui/StatusPill';
 import { motion } from 'motion/react';
+import ActionsMenu, { EditAction, DeleteAction } from '../../../components/shared/ActionsMenu';
+import { ConfirmDialog } from '../../../components/ui';
+import { toast } from 'react-hot-toast';
+
+const UnitForm = React.lazy(() => import('../components/UnitForm'));
 
 const PropertyProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { db } = useApp();
+    const { db, dataService, canAccess } = useApp();
+    
+    const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
+    const [editingUnit, setEditingUnit] = useState<any | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ id: string, name: string } | null>(null);
 
     const property = useMemo(() => db.properties.find(p => p.id === id), [db.properties, id]);
     const units = useMemo(() => db.units.filter(u => u.propertyId === id), [db.units, id]);
@@ -37,6 +46,22 @@ const PropertyProfilePage: React.FC = () => {
             arrears
         };
     }, [units, contracts, income, expenses, arrears]);
+
+    const handleOpenUnitModal = (unit: any | null) => {
+        setEditingUnit(unit);
+        setIsUnitModalOpen(true);
+    };
+
+    const handleDeleteUnit = async () => {
+        if (!confirmDelete) return;
+        try {
+            await dataService.remove('units', confirmDelete.id);
+            toast.success('تم حذف الوحدة بنجاح');
+            setConfirmDelete(null);
+        } catch (error) {
+            toast.error('فشل حذف الوحدة');
+        }
+    };
 
     if (!property) return (
         <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
@@ -102,9 +127,19 @@ const PropertyProfilePage: React.FC = () => {
                             <Home size={22} className="text-primary" />
                             الوحدات السكنية
                         </h3>
-                        <span className="text-xs font-bold text-muted-foreground bg-secondary px-4 py-1.5 rounded-full uppercase tracking-widest">
-                            {units.length} وحدة
-                        </span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs font-bold text-muted-foreground bg-secondary px-4 py-1.5 rounded-full uppercase tracking-widest">
+                                {units.length} وحدة
+                            </span>
+                            {canAccess('MANAGE_PROPERTIES') && (
+                                <button 
+                                    onClick={() => handleOpenUnitModal(null)}
+                                    className="btn btn-primary btn-sm flex items-center gap-2 rounded-xl"
+                                >
+                                    <PlusCircle size={16} /> إضافة وحدة
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -114,6 +149,7 @@ const PropertyProfilePage: React.FC = () => {
                                     <th className="pb-4 font-bold uppercase tracking-widest text-[11px]">النوع</th>
                                     <th className="pb-4 font-bold uppercase tracking-widest text-[11px]">الحالة</th>
                                     <th className="pb-4 font-bold uppercase tracking-widest text-[11px] text-left">الإيجار</th>
+                                    {canAccess('MANAGE_PROPERTIES') && <th className="pb-4 font-bold uppercase tracking-widest text-[11px] text-center">إجراءات</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
@@ -129,6 +165,14 @@ const PropertyProfilePage: React.FC = () => {
                                                 </StatusPill>
                                             </td>
                                             <td className="py-5 text-left font-mono font-bold text-heading">{formatCurrency(u.rentDefault)}</td>
+                                            {canAccess('MANAGE_PROPERTIES') && (
+                                                <td className="py-5 text-center">
+                                                    <ActionsMenu items={[
+                                                        EditAction(() => handleOpenUnitModal(u)),
+                                                        DeleteAction(() => setConfirmDelete({ id: u.id, name: u.name }))
+                                                    ]} />
+                                                </td>
+                                            )}
                                         </tr>
                                     );
                                 })}
@@ -192,6 +236,25 @@ const PropertyProfilePage: React.FC = () => {
                     </Card>
                 </div>
             </div>
+
+            <React.Suspense fallback={null}>
+                {isUnitModalOpen && (
+                    <UnitForm 
+                        isOpen={isUnitModalOpen} 
+                        onClose={() => setIsUnitModalOpen(false)} 
+                        unit={editingUnit} 
+                        propertyId={id!} 
+                    />
+                )}
+            </React.Suspense>
+
+            <ConfirmDialog
+                isOpen={!!confirmDelete}
+                onClose={() => setConfirmDelete(null)}
+                onConfirm={handleDeleteUnit}
+                title="تأكيد حذف الوحدة"
+                message={`هل أنت متأكد من حذف الوحدة "${confirmDelete?.name}"؟ لا يمكن التراجع عن هذا الإجراء.`}
+            />
         </motion.div>
     );
 };

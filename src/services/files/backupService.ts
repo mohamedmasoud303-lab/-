@@ -57,12 +57,16 @@ export const backupService = {
             report.push(`بدء استعادة النسخة الاحتياطية بتاريخ ${new Date(payload.timestamp).toLocaleString()}`);
             report.push(`إصدار المخطط: ${payload.version}`);
 
-            // 2. Stage restore data before any destructive operation
+            // 2. Clear current DB
             const tables = (dbEngine as any).tables;
-            const mutableTables = tables.filter((table: any) => !String(table.name).startsWith('view_'));
+            for (const table of tables) {
+                await table.clear();
+            }
+            report.push('تم مسح قاعدة البيانات الحالية بنجاح.');
+
+            // 3. Restore tables
             const STATIC_ID = 1;
-            const restorePlan: Array<{ table: any; tableName: string; tableData: any[] }> = [];
-            for (const table of mutableTables) {
+            for (const table of tables) {
                 const tableName = table.name;
                 let tableData: any[] = [];
 
@@ -75,30 +79,13 @@ export const backupService = {
                     tableData = (data as any)[tableName] || [];
                 }
 
-                if (!Array.isArray(tableData)) {
-                    throw new Error(`بيانات الجدول ${tableName} غير صالحة للاستعادة.`);
-                }
-                restorePlan.push({ table, tableName, tableData });
-            }
-
-            // 3. Clear current DB only after full restore plan is ready
-            for (const { table } of restorePlan) {
-                await table.clear();
-            }
-            report.push('تم مسح قاعدة البيانات الحالية بنجاح.');
-
-            // 4. Restore tables
-            for (const { table, tableName, tableData } of restorePlan) {
-                if (tableData.length === 0) continue;
-                try {
+                if (tableData.length > 0) {
                     await table.bulkAdd(tableData);
                     report.push(`تم استعادة ${tableData.length} سجل في جدول ${tableName}.`);
-                } catch (insertError: any) {
-                    throw new Error(`فشل استعادة جدول ${tableName}: ${insertError?.message || 'خطأ غير معروف'}`);
                 }
             }
 
-            // 5. Post-restore Integrity Validation
+            // 4. Post-restore Integrity Validation
             report.push('بدء فحص سلامة البيانات بعد الاستعادة...');
             const invoiceCount = await dbEngine.invoices.count();
             const contractCount = await dbEngine.contracts.count();
@@ -106,7 +93,7 @@ export const backupService = {
                 report.push('تحذير: تم العثور على فواتير بدون عقود مرتبطة.');
             }
 
-            // 6. Rebuild Financials
+            // 5. Rebuild Financials
             report.push('جاري إعادة بناء السجلات المالية والأرصدة...');
             await rebuildSnapshotsFromJournal();
             report.push('تمت إعادة بناء الأرصدة بنجاح.');
