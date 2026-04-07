@@ -304,8 +304,52 @@ export const dbEngine: any = {
   },
 
   wipeData: async () => {
-    const tableNames = Object.keys(dbEngine).filter(k => dbEngine[k] instanceof SupabaseTableWrapper);
-    await Promise.all(tableNames.map(name => dbEngine[name].clear()));
+    const mutableTableNames: Array<keyof typeof tablesMap> = [
+      'settings',
+      'users',
+      'owners',
+      'properties',
+      'units',
+      'tenants',
+      'contracts',
+      'invoices',
+      'receipts',
+      'receiptAllocations',
+      'expenses',
+      'maintenanceRecords',
+      'depositTxs',
+      'auditLog',
+      'governance',
+      'ownerSettlements',
+      'serials',
+      'snapshots',
+      'accounts',
+      'journalEntries',
+      'autoBackups',
+      'ownerBalances',
+      'accountBalances',
+      'kpiSnapshots',
+      'contractBalances',
+      'tenantBalances',
+      'notificationTemplates',
+      'outgoingNotifications',
+      'appNotifications',
+      'leads',
+      'lands',
+      'commissions',
+      'missions',
+      'budgets',
+      'attachments',
+      'utilityServices',
+    ];
+
+    for (const tableName of mutableTableNames) {
+      try {
+        await dbEngine[tableName].clear();
+      } catch (error: any) {
+        throw new Error(`Failed to wipe table "${tableName}": ${error?.message || 'Unknown error'}`);
+      }
+    }
     await dbEngine.initialize();
   },
 
