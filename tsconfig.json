@@ -2,7 +2,16 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
-      "core/types": ["core/types"]
+      "core/types": ["core/types/index.ts"],
+      "core/*": ["core/*"],
+      "lib/*": ["lib/*"],
+      "types/*": ["types/*"],
+      "utils/*": ["utils/*"],
+      "hooks/*": ["hooks/*"],
+      "services/*": ["services/*"],
+      "store/*": ["store/*"],
+      "components/*": ["components/*"],
+      "modules/*": ["modules/*"]
     },
     "target": "ESNext",
     "useDefineForClassFields": true,
