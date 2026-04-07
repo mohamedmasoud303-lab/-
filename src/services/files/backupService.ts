@@ -1,6 +1,6 @@
 
 import { dbEngine } from '../api/db';
-import { Database, User } from '../../core/types';
+import { Database, User } from '../../types';
 import { toast } from 'react-hot-toast';
 import { rebuildSnapshotsFromJournal } from '../../engine/financial/financialEngine';
 
