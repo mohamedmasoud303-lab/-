@@ -42,7 +42,7 @@ export class EvolutionRuntime {
       task.completedAt = new Date().toISOString();
       task.result = { auditResults };
 
-      await supabase.from('auditLog').insert([{
+      await supabase.from('audit_logs').insert([{
         action: 'EVOLUTION_CYCLE',
         tableName: 'system',
         recordId: task.id,

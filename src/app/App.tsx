@@ -5,6 +5,7 @@ import AppShell from '../components/layout/AppShell';
 import Login from '../modules/auth/pages/LoginPage';
 import { Toaster } from 'react-hot-toast';
 import RentrixAiAssistant from '../components/RentrixAiAssistant';
+import { AlertTriangle, Database } from 'lucide-react';
 
 // Lazy load pages for performance
 const Dashboard = React.lazy(() => import('../modules/dashboard/pages/DashboardPage'));
@@ -26,7 +27,7 @@ const Settings = React.lazy(() => import('../modules/settings/pages/SettingsPage
 const ChangePassword = React.lazy(() => import('../modules/settings/pages/ChangePasswordPage'));
 
 const App: React.FC = () => {
-  const { currentUser: user, isReady } = useApp();
+  const { currentUser: user, isReady, needsMigration } = useApp();
 
   if (!isReady) {
     return (
@@ -39,6 +40,25 @@ const App: React.FC = () => {
   return (
     <>
       <Toaster position="top-center" />
+      {needsMigration && user && (
+        <div className="bg-orange-500 text-white px-4 py-2 flex items-center justify-between gap-4 sticky top-0 z-[100] shadow-lg">
+          <div className="flex items-center gap-3">
+            <AlertTriangle size={20} className="animate-pulse" />
+            <div className="flex flex-col">
+              <span className="font-bold text-sm">تنبيه: تحديث قاعدة البيانات مطلوب</span>
+              <span className="text-[10px] opacity-90">يرجى تنفيذ ملف الهجرة (Migration Script) في Supabase لتفعيل الميزات الجديدة.</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => window.open('/supabase/migrations/20260407_refactor_schema.sql', '_blank')}
+              className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-xs font-bold transition-colors flex items-center gap-1"
+            >
+              <Database size={14} /> عرض الملف
+            </button>
+          </div>
+        </div>
+      )}
       <React.Suspense fallback={
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />

@@ -39,7 +39,7 @@ export class CommunicationHubService {
         logger.info(`Sending ${channel} to ${tenant.name} (${tenant.email || tenant.phone}): ${message}`);
         
         // Log the communication in audit log
-        await supabase.from('auditLog').insert([{
+        await supabase.from('audit_logs').insert([{
           action: `SEND_${channel}`,
           tableName: 'tenants',
           recordId: tenantId,
@@ -62,7 +62,7 @@ export class CommunicationHubService {
    */
   async analyzeEngagement(tenantId: string) {
     const { data: logs } = await supabase
-      .from('auditLog')
+      .from('audit_logs')
       .select('*')
       .eq('recordId', tenantId)
       .like('action', 'SEND_%');

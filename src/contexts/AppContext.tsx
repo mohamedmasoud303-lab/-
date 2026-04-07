@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { sanitizePhoneNumber } from '../utils/helpers';
 import { useAppStore } from '../store/useAppStore';
 import { dbEngine } from '../services/api/db';
+import { supabase } from '../lib/supabase';
 import { financeService as actualFinanceService } from '../engine/financial/financeService';
 import { dataService as actualDataService } from '../services/api/dataService';
 import { authService as actualAuthService } from '../services/auth/authService';
@@ -38,6 +39,7 @@ interface AppContextType {
   currentUser: User | null;
   isReady: boolean;
   isReadOnly: boolean;
+  needsMigration: boolean;
   refreshData: () => Promise<void>;
   
   // Memoized Balance Maps
@@ -101,6 +103,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const { appUser, loading: authLoading } = useAuth();
   const [db, setDb] = useState<Database>(emptyDb);
   const [isReady, setIsReady] = useState(false);
+  const [needsMigration, setNeedsMigration] = useState(false);
   
   const currentUser = appUser;
 
@@ -170,6 +173,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const refreshData = useCallback(async () => {
     logger.debug("refreshData started");
     try {
+      // Check if migration is needed by checking a table that should exist after refactor
+      const { error } = await supabase.from('audit_logs').select('id', { count: 'exact', head: true });
+      if (error && error.code === 'PGRST116' || error && error.message.includes('does not exist')) {
+        // Table doesn't exist, likely needs migration
+        setNeedsMigration(true);
+      } else {
+        setNeedsMigration(false);
+      }
+
       await dbEngine.initialize();
       logger.debug("dbEngine.initialize completed");
       const allData = await dbEngine.getAllData();
@@ -342,6 +354,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updateSettings,
     updateGovernance,
     generateOwnerPortalLink,
+    needsMigration,
     generateNotifications: () => apiCall('engine', 'generateNotifications'),
     sendWhatsApp: (phone, message) => {
         const cleanPhone = sanitizePhoneNumber(phone);

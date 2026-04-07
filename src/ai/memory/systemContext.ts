@@ -16,16 +16,16 @@ export const fetchSystemContext = async (): Promise<SystemContext> => {
     supabase.from('contracts').select('*', { count: 'exact', head: true }).eq('status', 'ACTIVE'),
     supabase.from('tenants').select('*', { count: 'exact', head: true }),
     supabase.from('invoices').select('*', { count: 'exact', head: true })
-      .lt('dueDate', today)
+      .lt('due_date', today)
       .neq('status', 'PAID')
       .neq('status', 'VOID'),
-    supabase.from('invoices').select('paidAmount')
-      .gte('dueDate', firstDayOfMonth)
-      .lte('dueDate', today)
+    supabase.from('invoices').select('paid_amount')
+      .gte('due_date', firstDayOfMonth)
+      .lte('due_date', today)
       .eq('status', 'PAID')
   ]);
 
-  const totalRevenue = monthlyRevenue.data?.reduce((sum: number, inv: any) => sum + (inv.paidAmount || 0), 0) || 0;
+  const totalRevenue = monthlyRevenue.data?.reduce((sum: number, inv: any) => sum + (inv.paid_amount || 0), 0) || 0;
 
   return {
     total_units: units.count || 0,

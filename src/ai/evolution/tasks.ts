@@ -18,7 +18,7 @@ export class AutonomousTasks {
     // const issues = await this.validator.validateModularity(files);
     
     // 3. Log results
-    await supabase.from('auditLog').insert([{
+    await supabase.from('audit_logs').insert([{
       action: 'CODE_HEALTH_AUDIT',
       tableName: 'system',
       recordId: 'health-audit',
@@ -36,7 +36,7 @@ export class AutonomousTasks {
     // const issues = await this.runtime.runEvolutionCycle();
     
     // 2. Log results
-    await supabase.from('auditLog').insert([{
+    await supabase.from('audit_logs').insert([{
       action: 'SECURITY_SCAN',
       tableName: 'system',
       recordId: 'security-scan',
@@ -54,7 +54,7 @@ export class AutonomousTasks {
     // const issues = await this.runtime.runEvolutionCycle();
     
     // 2. Log results
-    await supabase.from('auditLog').insert([{
+    await supabase.from('audit_logs').insert([{
       action: 'PERFORMANCE_CHECK',
       tableName: 'system',
       recordId: 'performance-check',
@@ -77,7 +77,7 @@ export class AutonomousTasks {
     // }
     
     // 3. Log results
-    await supabase.from('auditLog').insert([{
+    await supabase.from('audit_logs').insert([{
       action: 'DEPENDENCY_UPGRADE',
       tableName: 'system',
       recordId: 'dep-upgrade',

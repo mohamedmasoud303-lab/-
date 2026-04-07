@@ -28,7 +28,7 @@ export const runDailyOperations = async () => {
     });
 
     // 4. Log the autonomous task completion
-    await supabase.from('auditLog').insert([{
+    await supabase.from('audit_logs').insert([{
       action: 'DAILY_CRON',
       tableName: 'system',
       recordId: 'daily-ops',

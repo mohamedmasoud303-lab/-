@@ -18,12 +18,12 @@ export const createInvoiceTool: Tool = {
     const { data, error } = await supabase
       .from('invoices')
       .insert([{
-        contractId: args.contractId,
+        contract_id: args.contractId,
         amount: args.amount,
-        dueDate: args.dueDate,
+        due_date: args.dueDate,
         description: args.description,
         status: 'UNPAID',
-        createdAt: new Date().toISOString()
+        created_at: new Date().toISOString()
       }])
       .select()
       .single();
@@ -50,10 +50,10 @@ export const sendReminderTool: Tool = {
     // For now, we log the action and update the audit log
     const { data: tenant } = await supabase.from('tenants').select('*').eq('id', args.tenantId).single();
     
-    const { error } = await supabase.from('auditLog').insert([{
+    const { error } = await supabase.from('audit_logs').insert([{
       action: 'SEND_REMINDER',
-      tableName: 'invoices',
-      recordId: args.invoiceId,
+      table_name: 'invoices',
+      record_id: args.invoiceId,
       details: `Sent reminder to ${tenant?.name}: ${args.message}`,
       timestamp: Date.now()
     }]);
@@ -78,8 +78,8 @@ export const generateReportTool: Tool = {
     const { data: invoices } = await supabase
       .from('invoices')
       .select('*')
-      .gte('dueDate', args.startDate)
-      .lte('dueDate', args.endDate);
+      .gte('due_date', args.startDate)
+      .lte('due_date', args.endDate);
 
     const totalRevenue = invoices?.reduce((sum: number, inv: any) => sum + (inv.paidAmount || 0), 0) || 0;
     const totalExpected = invoices?.reduce((sum: number, inv: any) => sum + inv.amount, 0) || 0;
@@ -106,8 +106,8 @@ export const fetchTenantDataTool: Tool = {
   execute: async (args: { tenantId: string }) => {
     const [tenant, contracts, invoices] = await Promise.all([
       supabase.from('tenants').select('*').eq('id', args.tenantId).single(),
-      supabase.from('contracts').select('*').eq('tenantId', args.tenantId),
-      supabase.from('invoices').select('*').eq('tenantId', args.tenantId)
+      supabase.from('contracts').select('*').eq('tenant_id', args.tenantId),
+      supabase.from('invoices').select('*').eq('tenant_id', args.tenantId)
     ]);
 
     return {
@@ -131,7 +131,7 @@ export const detectOverdueInvoicesTool: Tool = {
     const { data, error } = await supabase
       .from('invoices')
       .select('*, tenants(name, phone)')
-      .lt('dueDate', today)
+      .lt('due_date', today)
       .neq('status', 'PAID')
       .neq('status', 'VOID');
 

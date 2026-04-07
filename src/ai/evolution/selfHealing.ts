@@ -28,7 +28,7 @@ export class SelfHealingSystem {
       // }
 
       // 4. Log completion
-      await supabase.from('auditLog').insert([{
+      await supabase.from('audit_logs').insert([{
         action: 'SELF_HEALING',
         tableName: 'system',
         recordId: 'build-repair',
