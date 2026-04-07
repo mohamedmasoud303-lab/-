@@ -8,6 +8,7 @@ import { AppProvider } from './contexts/AppContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import App from './app/App';
 import './index.css';
+import { logger } from './lib/logger';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -33,6 +34,6 @@ root.render(
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed: ', err));
+    navigator.serviceWorker.register('/sw.js').catch(err => logger.error('SW registration failed: ', err));
   });
 }

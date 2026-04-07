@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { OwnerSettlement } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { OwnerSettlement } from 'core/types';
+import Modal from 'components/ui/Modal';
 
 interface OwnerSettlementFormProps {
     isOpen: boolean;

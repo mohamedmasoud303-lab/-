@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PrintTemplate from './PrintTemplate';
-import { Contract } from '../../types';
+import { Contract } from '../../core/types';
 import { useApp } from '../../contexts/AppContext';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 

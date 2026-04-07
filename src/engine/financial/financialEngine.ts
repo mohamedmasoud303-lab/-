@@ -2,7 +2,7 @@
 import { 
   OwnerBalance, AccountBalance, 
   ContractBalance, JournalEntry, Property 
-} from '../../types';
+} from '../../core/types';
 import { dbEngine } from '../../services/api/db';
 import { getLocalISODate } from '../../utils/helpers';
 

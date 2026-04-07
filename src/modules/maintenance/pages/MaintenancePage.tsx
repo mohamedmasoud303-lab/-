@@ -1,23 +1,24 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { MaintenanceRecord, Expense, Invoice } from '../../../types';
-import { selectMaintenanceWithDetails } from '../../../services/selectors';
-import Card from '../../../components/ui/Card';
-import ActionsMenu, { EditAction, DeleteAction, PrintAction } from '../../../components/shared/ActionsMenu';
-import { formatCurrency, formatDate } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { MaintenanceRecord, Expense, Invoice } from 'core/types';
+import { selectMaintenanceWithDetails } from 'services/selectors';
+import Card from 'components/ui/Card';
+import ActionsMenu, { EditAction, DeleteAction, PrintAction } from 'components/shared/ActionsMenu';
+import { formatCurrency, formatDate } from 'utils/helpers';
 import { toast } from 'react-hot-toast';
 import { Wrench, PlusCircle, AlertTriangle, Clock, DollarSign } from 'lucide-react';
-import SummaryStatCard from '../../../components/ui/SummaryStatCard';
-import StatusPill from '../../../components/ui/StatusPill';
-import PrintPreviewModal from '../../../components/shared/PrintPreviewModal';
-import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from '../../../components/ui/Table';
-import { ConfirmDialog } from '../../../components/ui';
-import MaintenancePrintable from '../../../components/print/MaintenancePrintable';
-import { exportMaintenanceRecordToPdf } from '../../../services/files/pdfService';
-import { financeService } from '../../../engine/financial/financeService';
-import TableControls from '../../../components/shared/TableControls';
-import MaintenanceForm from '../components/MaintenanceForm';
+import SummaryStatCard from 'components/ui/SummaryStatCard';
+import StatusPill from 'components/ui/StatusPill';
+import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from 'components/ui/Table';
+import { ConfirmDialog } from 'components/ui';
+import { exportMaintenanceRecordToPdf } from 'services/files/pdfService';
+import { financeService } from 'engine/financial/financeService';
+import TableControls from 'components/shared/TableControls';
+// Lazy load forms and modals for performance
+const MaintenanceForm = React.lazy(() => import('../components/MaintenanceForm'));
+const PrintPreviewModal = React.lazy(() => import('components/shared/PrintPreviewModal'));
+const MaintenancePrintable = React.lazy(() => import('components/print/MaintenancePrintable'));
 
 const Maintenance: React.FC = () => {
     const { db, dataService, currentUser } = useApp();
@@ -161,7 +162,9 @@ const Maintenance: React.FC = () => {
                     {recordsWithDetails.length === 0 && (<div className="text-center py-16"><Wrench size={52} className="mx-auto text-muted" /><h3 className="mt-4 text-xl font-semibold text-heading">لا توجد طلبات صيانة مطابقة</h3></div>)}
                 </div>
             </Card>
-            <MaintenanceForm isOpen={isModalOpen} onClose={handleCloseModal} record={editingRecord} />
+            <React.Suspense fallback={null}>
+                <MaintenanceForm isOpen={isModalOpen} onClose={handleCloseModal} record={editingRecord} />
+            </React.Suspense>
             
             <ConfirmDialog
                 isOpen={!!confirmDelete}
@@ -171,21 +174,23 @@ const Maintenance: React.FC = () => {
                 message={`هل أنت متأكد من حذف طلب الصيانة رقم "${confirmDelete?.no}"؟`}
             />
 
-            {printingRecord && (
-                <PrintPreviewModal
-                    isOpen={!!printingRecord}
-                    onClose={() => setPrintingRecord(null)}
-                    title={`طباعة طلب صيانة #${printingRecord.no}`}
-                    onExportPdf={() => {
-                        if (!db.settings || !printingRecord) return;
-                        const unit = db.units.find(u => u.id === printingRecord.unitId);
-                        const property = unit ? db.properties.find(p => p.id === unit.propertyId) : undefined;
-                        exportMaintenanceRecordToPdf(printingRecord, unit, property, db.settings);
-                    }}
-                >
-                    <MaintenancePrintable record={printingRecord} />
-                </PrintPreviewModal>
-            )}
+            <React.Suspense fallback={null}>
+                {printingRecord && (
+                    <PrintPreviewModal
+                        isOpen={!!printingRecord}
+                        onClose={() => setPrintingRecord(null)}
+                        title={`طباعة طلب صيانة #${printingRecord.no}`}
+                        onExportPdf={() => {
+                            if (!db.settings || !printingRecord) return;
+                            const unit = db.units.find(u => u.id === printingRecord.unitId);
+                            const property = unit ? db.properties.find(p => p.id === unit.propertyId) : undefined;
+                            exportMaintenanceRecordToPdf(printingRecord, unit, property, db.settings);
+                        }}
+                    >
+                        <MaintenancePrintable record={printingRecord} />
+                    </PrintPreviewModal>
+                )}
+            </React.Suspense>
         </div>
     );
 };

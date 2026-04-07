@@ -1,5 +1,5 @@
 
-import { Database, JournalEntry, Invoice, Receipt, Expense, OwnerSettlement, Property, Unit, Contract, Tenant } from '../../../types';
+import { Database, JournalEntry, Invoice, Receipt, Expense, OwnerSettlement, Property, Unit, Contract, Tenant } from 'core/types';
 import { differenceInDays, isBefore, isAfter, parseISO, startOfDay } from 'date-fns';
 
 export interface StatementTransaction {

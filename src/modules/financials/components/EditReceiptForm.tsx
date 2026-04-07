@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Receipt } from '../../../types';
-import Modal from '../../../components/ui/Modal';
-import { formatCurrency } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Receipt } from 'core/types';
+import Modal from 'components/ui/Modal';
+import { formatCurrency } from 'utils/helpers';
 
 interface EditReceiptFormProps {
     isOpen: boolean;

@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase';
-import { SystemContext } from '../types';
+import { SystemContext } from '../../core/types';
 
 export const fetchSystemContext = async (): Promise<SystemContext> => {
   const today = new Date().toISOString().split('T')[0];

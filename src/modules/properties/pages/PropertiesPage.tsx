@@ -1,20 +1,22 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Property, Unit, Owner } from '../../../types';
-import { selectPropertiesWithDetails } from '../../../services/selectors';
-import Card from '../../../components/ui/Card';
-import PageHeader from '../../../components/ui/PageHeader';
+import { useApp } from 'contexts/AppContext';
+import { Property, Unit, Owner } from 'core/types';
+import { selectPropertiesWithDetails } from 'services/selectors';
+import Card from 'components/ui/Card';
+import PageHeader from 'components/ui/PageHeader';
 import { PlusCircle, ArrowLeft, Lock, Building, Home } from 'lucide-react';
-import ActionsMenu, { EditAction, DeleteAction } from '../../../components/shared/ActionsMenu';
-import { ConfirmDialog } from '../../../components/ui';
-import { formatCurrency } from '../../../utils/helpers';
-import StatusPill from '../../../components/ui/StatusPill';
+import ActionsMenu, { EditAction, DeleteAction } from 'components/shared/ActionsMenu';
+import { ConfirmDialog } from 'components/ui';
+import { formatCurrency } from 'utils/helpers';
+import StatusPill from 'components/ui/StatusPill';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import TableControls from '../../../components/shared/TableControls';
-import PropertyForm from '../components/PropertyForm';
-import UnitForm from '../components/UnitForm';
+
+// Lazy load forms for performance
+const PropertyForm = React.lazy(() => import('../components/PropertyForm'));
+const UnitForm = React.lazy(() => import('../components/UnitForm'));
 
 const PropertiesPage: React.FC = () => {
     const { db, canAccess, dataService } = useApp();
@@ -92,7 +94,9 @@ const PropertiesPage: React.FC = () => {
                     </div>
                 )}
             </div>
-            {isPropModalOpen && <PropertyForm isOpen={isPropModalOpen} onClose={() => setIsPropModalOpen(false)} property={editingProp} />}
+            <React.Suspense fallback={null}>
+                {isPropModalOpen && <PropertyForm isOpen={isPropModalOpen} onClose={() => setIsPropModalOpen(false)} property={editingProp} />}
+            </React.Suspense>
             
             <ConfirmDialog
                 isOpen={!!confirmDelete}

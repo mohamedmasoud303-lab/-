@@ -1,15 +1,15 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Mission, Lead, Owner, User } from '../../../types';
-import Card from '../../../components/ui/Card';
-import ActionsMenu, { EditAction, DeleteAction } from '../../../components/shared/ActionsMenu';
-import { formatCurrency, formatDate } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Mission, Lead, Owner, User } from 'core/types';
+import Card from 'components/ui/Card';
+import ActionsMenu, { EditAction, DeleteAction } from 'components/shared/ActionsMenu';
+import { formatCurrency, formatDate } from 'utils/helpers';
 import { ClipboardList, PlusCircle, Calendar, Clock, CheckCircle2, Circle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import PageHeader from '../../../components/ui/PageHeader';
-import StatusPill from '../../../components/ui/StatusPill';
-import TableControls from '../../../components/shared/TableControls';
+import PageHeader from 'components/ui/PageHeader';
+import StatusPill from 'components/ui/StatusPill';
+import TableControls from 'components/shared/TableControls';
 import MissionForm from '../components/MissionForm';
 
 const Missions: React.FC = () => {

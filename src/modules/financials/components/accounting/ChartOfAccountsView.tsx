@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../../../../contexts/AppContext';
-import { Account } from '../../../../types';
-import { formatCurrency } from '../../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Account } from 'core/types';
+import { formatCurrency } from 'utils/helpers';
 import { PlusCircle, BookOpen, Layers } from 'lucide-react';
-import ActionsMenu, { EditAction, DeleteAction } from '../../../../components/shared/ActionsMenu';
+import ActionsMenu, { EditAction, DeleteAction } from 'components/shared/ActionsMenu';
 import AccountForm from '../AccountForm';
 
 const ChartOfAccountsView: React.FC = () => {

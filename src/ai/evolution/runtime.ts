@@ -1,5 +1,5 @@
 import { CodeAuditTool, RefactorTool } from './tools';
-import { EvolutionTask, AuditResult } from './types';
+import { EvolutionTask, AuditResult } from '../evolution/types';
 import { supabase } from '../../lib/supabase';
 
 export class EvolutionRuntime {

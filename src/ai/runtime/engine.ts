@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { RentrixOperatorAgent } from '../agents/RentrixOperatorAgent';
 import { fetchSystemContext } from '../memory/systemContext';
-import { AgentResult } from '../types';
+import { AgentResult } from '../../core/types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 

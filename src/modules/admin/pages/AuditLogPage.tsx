@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../../contexts/AppContext';
-import { Snapshot } from '../../../types';
+import { Snapshot } from 'core/types';
 import Card from '../../../components/ui/Card';
 import { PlusCircle, RotateCcw, XCircle, Search } from 'lucide-react';
 import { formatDateTime } from '../../../utils/helpers';

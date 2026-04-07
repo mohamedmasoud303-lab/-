@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 
 export interface CommunicationChannel {
   id: string;
@@ -35,7 +36,7 @@ export class CommunicationHubService {
     for (const channel of channels) {
       try {
         // Simulated sending logic
-        console.log(`Sending ${channel} to ${tenant.name} (${tenant.email || tenant.phone}): ${message}`);
+        logger.info(`Sending ${channel} to ${tenant.name} (${tenant.email || tenant.phone}): ${message}`);
         
         // Log the communication in audit log
         await supabase.from('auditLog').insert([{
@@ -48,7 +49,7 @@ export class CommunicationHubService {
 
         results.push({ channel, status: 'SUCCESS' });
       } catch (error) {
-        console.error(`Failed to send ${channel} to ${tenant.name}:`, error);
+        logger.error(`Failed to send ${channel} to ${tenant.name}:`, error);
         results.push({ channel, status: 'FAILED', error: error instanceof Error ? error.message : String(error) });
       }
     }

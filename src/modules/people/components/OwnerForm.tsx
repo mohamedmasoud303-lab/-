@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Owner } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { Owner } from 'core/types';
+import Modal from 'components/ui/Modal';
 import { toast } from 'react-hot-toast';
 
 const OwnerForm: React.FC<{ isOpen: boolean, onClose: () => void, owner: Owner | null }> = ({ isOpen, onClose, owner }) => {

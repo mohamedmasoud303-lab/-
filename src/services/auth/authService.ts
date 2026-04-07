@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase';
 import { User } from '../../types';
 import { toast } from 'react-hot-toast';
+import { logger } from '../../lib/logger';
 
 export const authService = {
   login: async (email: string, password: string): Promise<{ok: boolean, msg: string, user?: User}> => {
@@ -27,7 +28,7 @@ export const authService = {
       const { count, error: countError } = await supabase.from('users').select('*', { count: 'exact', head: true });
       
       if (countError) {
-        console.error("Failed to check users count (table might not exist):", countError);
+        logger.error("Failed to check users count (table might not exist):", countError);
         return { ok: false, msg: 'جدول المستخدمين (users) غير موجود في قاعدة البيانات. يرجى تنفيذ ملف schema.sql في Supabase.' };
       }
 
@@ -47,7 +48,7 @@ export const authService = {
         .maybeSingle();
 
       if (insertError || !newProfile) {
-        console.error("Failed to create user profile:", insertError);
+        logger.error("Failed to create user profile:", insertError);
         return { ok: false, msg: 'فشل تحميل أو إنشاء ملف المستخدم. تأكد من وجود جدول users وإعدادات RLS.' };
       }
       userProfile = newProfile;

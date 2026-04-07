@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { DepositTx } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { DepositTx } from 'core/types';
+import Modal from 'components/ui/Modal';
 
 interface DepositTxFormProps {
     isOpen: boolean;

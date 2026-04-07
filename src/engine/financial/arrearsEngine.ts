@@ -1,5 +1,5 @@
 
-import { Database, ContractBalance, TenantBalance, AgedDebt } from '../../types';
+import { Database, ContractBalance, TenantBalance, AgedDebt } from '../../core/types';
 
 /**
  * Centralized engine for calculating tenant arrears and aging.

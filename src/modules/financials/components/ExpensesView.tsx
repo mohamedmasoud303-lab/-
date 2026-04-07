@@ -1,16 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Expense } from '../../../types';
-import { selectExpensesWithDetails } from '../../../services/selectors';
-import TableControls from '../../../components/shared/TableControls';
-import StatusPill from '../../../components/ui/StatusPill';
-import ActionsMenu, { EditAction, VoidAction, PrintAction } from '../../../components/shared/ActionsMenu';
-import { ConfirmDialog } from '../../../components/ui';
-import { formatCurrency, formatDateTime } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Expense } from 'core/types';
+import { selectExpensesWithDetails } from 'services/selectors';
+import TableControls from 'components/shared/TableControls';
+import StatusPill from 'components/ui/StatusPill';
+import ActionsMenu, { EditAction, VoidAction, PrintAction } from 'components/shared/ActionsMenu';
+import { ConfirmDialog } from 'components/ui';
+import { formatCurrency, formatDateTime } from 'utils/helpers';
 import ExpenseForm from './ExpenseForm';
-import PrintPreviewModal from '../../../components/shared/PrintPreviewModal';
-import ExpensePrintable from '../../../components/print/ExpensePrintable';
-import { exportExpenseToPdf } from '../../../services/files/pdfService';
+import PrintPreviewModal from 'components/shared/PrintPreviewModal';
+import ExpensePrintable from 'components/print/ExpensePrintable';
+import { exportExpenseToPdf } from 'services/files/pdfService';
 
 const ExpensesView: React.FC = () => {
     const { db, financeService } = useApp();

@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { UtilityService } from '../../../types';
-import { formatCurrency, formatDate, getStatusBadgeClass } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { UtilityService } from 'core/types';
+import { formatCurrency, formatDate, getStatusBadgeClass } from 'utils/helpers';
 import { Plus, Search, Filter, Edit2, Trash2, Zap, Droplets, Wifi, Building } from 'lucide-react';
 import UtilityServiceForm from './UtilityServiceForm';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusPill from 'components/ui/StatusPill';
 
 const UtilityServicesView: React.FC = () => {
     const { db, dataService } = useApp();

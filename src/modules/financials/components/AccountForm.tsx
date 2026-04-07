@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Account } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { Account } from 'core/types';
+import Modal from 'components/ui/Modal';
 import { toast } from 'react-hot-toast';
 
 interface AccountFormProps {

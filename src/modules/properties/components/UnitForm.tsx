@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Unit } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { Unit } from 'core/types';
+import Modal from 'components/ui/Modal';
 import { toast } from 'react-hot-toast';
 
 interface UnitFormProps {

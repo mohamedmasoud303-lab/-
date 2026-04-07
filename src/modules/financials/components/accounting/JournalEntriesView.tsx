@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../../../../contexts/AppContext';
-import { Account } from '../../../../types';
-import { formatCurrency, formatDate } from '../../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Account } from 'core/types';
+import { formatCurrency, formatDate } from 'utils/helpers';
 import { PlusCircle } from 'lucide-react';
 import ManualJournalVoucherForm from '../ManualJournalVoucherForm';
 

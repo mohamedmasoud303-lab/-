@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "core/types": ["core/types"]
+    },
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -16,5 +20,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "electron", "types.ts", "App.tsx", "index.tsx", "services", "utils", "hooks", "components", "pages"]
+  "include": ["src"]
 }

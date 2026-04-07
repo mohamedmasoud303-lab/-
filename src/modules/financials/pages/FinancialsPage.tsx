@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import Card from '../../../components/ui/Card';
 import PageHeader from '../../../components/ui/PageHeader';
 import Tabs from '../../../components/ui/Tabs';
-import ReceiptsView from '../components/ReceiptsView';
-import ExpensesView from '../components/ExpensesView';
-import DepositsView from '../components/DepositsView';
-import OwnerSettlementsView from '../components/OwnerSettlementsView';
-import UtilityServicesView from '../components/UtilityServicesView';
+
+// Lazy load views for performance
+const ReceiptsViewLazy = React.lazy(() => import('../components/ReceiptsView'));
+const ExpensesViewLazy = React.lazy(() => import('../components/ExpensesView'));
+const DepositsViewLazy = React.lazy(() => import('../components/DepositsView'));
+const OwnerSettlementsViewLazy = React.lazy(() => import('../components/OwnerSettlementsView'));
+const UtilityServicesViewLazy = React.lazy(() => import('../components/UtilityServicesView'));
 
 const Financials: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'receipts' | 'expenses' | 'deposits' | 'settlements' | 'utilities'>('receipts');
@@ -28,11 +30,17 @@ const Financials: React.FC = () => {
                     onTabClick={(id) => setActiveTab(id as any)}
                 />
                 <div className="pt-8">
-                    {activeTab === 'receipts' && <ReceiptsView />}
-                    {activeTab === 'expenses' && <ExpensesView />}
-                    {activeTab === 'utilities' && <UtilityServicesView />}
-                    {activeTab === 'deposits' && <DepositsView />}
-                    {activeTab === 'settlements' && <OwnerSettlementsView />}
+                    <React.Suspense fallback={
+                        <div className="flex-1 flex items-center justify-center p-20">
+                            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    }>
+                        {activeTab === 'receipts' && <ReceiptsViewLazy />}
+                        {activeTab === 'expenses' && <ExpensesViewLazy />}
+                        {activeTab === 'utilities' && <UtilityServicesViewLazy />}
+                        {activeTab === 'deposits' && <DepositsViewLazy />}
+                        {activeTab === 'settlements' && <OwnerSettlementsViewLazy />}
+                    </React.Suspense>
                 </div>
             </Card>
         </div>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PrintTemplate from './PrintTemplate';
-import { MaintenanceRecord } from '../../types';
+import { MaintenanceRecord } from '../../core/types';
 import { useApp } from '../../contexts/AppContext';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 

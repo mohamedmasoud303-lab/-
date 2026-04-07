@@ -1,10 +1,5 @@
 
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+export { cn } from '../lib/utils';
 
 const ARABIC_INDIC_DIGITS: { [key: string]: string } = {
   '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',

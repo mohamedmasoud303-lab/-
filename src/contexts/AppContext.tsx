@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode, useMemo } from 'react';
-import { User, Settings, Database, PermissionAction, ContractBalance, OwnerBalance, AccountBalance, TenantBalance, Governance } from '../types';
+import { User, Settings, Database, PermissionAction, ContractBalance, OwnerBalance, AccountBalance, TenantBalance, Governance } from 'core/types';
 import { toast } from 'react-hot-toast';
 import { sanitizePhoneNumber } from '../utils/helpers';
 import { useAppStore } from '../store/useAppStore';
@@ -12,6 +12,7 @@ import { rebuildSnapshotsFromJournal } from '../engine/financial/financialEngine
 import { useAuth } from './AuthContext';
 
 import { backupService } from '../services/files/backupService';
+import { logger } from '../lib/logger';
 
 // Define a default empty database structure
 const emptyDb: Database = {
@@ -26,6 +27,10 @@ const emptyDb: Database = {
   outgoingNotifications: [], appNotifications: [], leads: [], lands: [],
   commissions: [], missions: [], budgets: [], attachments: [],
   utilityServices: [],
+  viewPropertiesFull: [],
+  viewUnitsFull: [],
+  viewTenantsFull: [],
+  viewAccountBalancesFull: [],
 };
 
 interface AppContextType {
@@ -156,24 +161,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         
         return result || { ok: true };
     } catch (e: any) {
-        console.error(`API call failed: ${domain}.${action}`, e);
+        logger.error(`API call failed: ${domain}.${action}`, e);
         toast.error(e.message || 'An unexpected error occurred.');
         throw e;
     }
   }, [db, currentUser]);
   
   const refreshData = useCallback(async () => {
-    console.log("DEBUG: refreshData started");
+    logger.debug("refreshData started");
     try {
       await dbEngine.initialize();
-      console.log("DEBUG: dbEngine.initialize completed");
+      logger.debug("dbEngine.initialize completed");
       const allData = await dbEngine.getAllData();
-      console.log("DEBUG: dbEngine.getAllData completed");
+      logger.debug("dbEngine.getAllData completed");
       setDb(allData);
       setIsReady(true);
-      console.log("DEBUG: refreshData completed successfully");
+      logger.debug("refreshData completed successfully");
     } catch(e) {
-      console.error("Fatal: Could not load data from backend.", e);
+      logger.error("Fatal: Could not load data from backend.", e);
       setIsReady(true); // Ensure loading screen is removed even on error
     }
   }, []);
@@ -233,7 +238,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return `${baseUrl}#/owner-view/${ownerId}?auth=${token}`;
   };
 
-  const value: AppContextType = {
+  const value: AppContextType = useMemo(() => ({
     db,
     currentUser,
     isReady,
@@ -349,7 +354,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     googleSignOut: () => {},
     syncToGoogleDrive: async () => { toast.error('هذه الميزة غير متوفرة في نسخة سطح المكتب'); },
     restoreFromGoogleDrive: async () => { toast.error('هذه الميزة غير متوفرة في نسخة سطح المكتب'); }
-  };
+  }), [
+    db, currentUser, isReady, isReadOnly, refreshData, 
+    contractBalances, ownerBalances, accountBalances, tenantBalances,
+    canAccess, updateSettings, updateGovernance, generateOwnerPortalLink, apiCall
+  ]);
 
   if (!isReady || authLoading) {
       return (

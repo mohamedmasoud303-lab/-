@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { UtilityService } from '../../../types';
-import { getLocalISODate } from '../../../utils/helpers';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { UtilityService } from 'core/types';
+import { getLocalISODate } from 'utils/helpers';
+import Modal from 'components/ui/Modal';
 
 interface UtilityServiceFormProps {
     isOpen: boolean;

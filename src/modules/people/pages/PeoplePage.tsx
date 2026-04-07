@@ -1,20 +1,22 @@
 
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Owner, Tenant } from '../../../types';
-import Card from '../../../components/ui/Card';
-import ActionsMenu, { EditAction, DeleteAction } from '../../../components/shared/ActionsMenu';
+import { useApp } from 'contexts/AppContext';
+import { Owner, Tenant } from 'core/types';
+import Card from 'components/ui/Card';
+import ActionsMenu, { EditAction, DeleteAction } from 'components/shared/ActionsMenu';
 import { MessageCircle, Users, BookOpen, Link as LinkIcon, PlusCircle } from 'lucide-react';
-import { WhatsAppComposerModal } from '../../../components/shared/WhatsAppComposerModal';
-import { ConfirmDialog } from '../../../components/ui';
+import { ConfirmDialog } from 'components/ui';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import TenantForm from '../components/TenantForm';
-import OwnerForm from '../components/OwnerForm';
-import StatusPill from '../../../components/ui/StatusPill';
-import PageHeader from '../../../components/ui/PageHeader';
-import Tabs from '../../../components/ui/Tabs';
-import TableControls from '../../../components/shared/TableControls';
+import StatusPill from 'components/ui/StatusPill';
+import PageHeader from 'components/ui/PageHeader';
+import Tabs from 'components/ui/Tabs';
+import TableControls from 'components/shared/TableControls';
+
+// Lazy load forms and modals for performance
+const TenantForm = React.lazy(() => import('../components/TenantForm'));
+const OwnerForm = React.lazy(() => import('../components/OwnerForm'));
+const WhatsAppComposerModal = React.lazy(() => import('components/shared/WhatsAppComposerModal'));
 
 const People: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'tenants' | 'owners'>('tenants');
@@ -147,8 +149,10 @@ const TenantsView: React.FC = () => {
                 {filteredTenants.length === 0 && <div className="text-center py-16 text-muted-foreground font-bold italic">لا يوجد مستأجرون مطابقون للبحث.</div>}
             </div>
 
-            <TenantForm isOpen={isModalOpen} onClose={handleCloseModals} tenant={editingTenant} />
-            <WhatsAppComposerModal isOpen={!!whatsAppContext} onClose={() => setWhatsAppContext(null)} context={whatsAppContext} />
+            <React.Suspense fallback={null}>
+                <TenantForm isOpen={isModalOpen} onClose={handleCloseModals} tenant={editingTenant} />
+                <WhatsAppComposerModal isOpen={!!whatsAppContext} onClose={() => setWhatsAppContext(null)} context={whatsAppContext} />
+            </React.Suspense>
             
             <ConfirmDialog
                 isOpen={!!confirmDelete}
@@ -248,7 +252,9 @@ const OwnersView: React.FC = () => {
                 </table>
                 {filteredOwners.length === 0 && <div className="text-center py-16 text-muted-foreground font-bold italic">لا يوجد ملاك مطابقون للبحث.</div>}
             </div>
-            <OwnerForm isOpen={isModalOpen} onClose={handleCloseModals} owner={editingOwner} />
+            <React.Suspense fallback={null}>
+                <OwnerForm isOpen={isModalOpen} onClose={handleCloseModals} owner={editingOwner} />
+            </React.Suspense>
             
             <ConfirmDialog
                 isOpen={!!confirmDelete}

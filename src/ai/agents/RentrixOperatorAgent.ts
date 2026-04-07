@@ -1,4 +1,4 @@
-import { Agent } from '../types';
+import { Agent } from '../../core/types';
 import { 
   createInvoiceTool, 
   sendReminderTool, 

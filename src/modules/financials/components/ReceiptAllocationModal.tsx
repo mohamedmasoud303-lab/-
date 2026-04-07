@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Receipt } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { Receipt } from 'core/types';
+import Modal from 'components/ui/Modal';
 import { toast } from 'react-hot-toast';
-import { formatCurrency, formatDate } from '../../../utils/helpers';
+import { formatCurrency, formatDate } from 'utils/helpers';
 
 interface ReceiptAllocationModalProps {
     isOpen: boolean;

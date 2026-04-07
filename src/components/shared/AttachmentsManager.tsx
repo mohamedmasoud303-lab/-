@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Paperclip, Trash2, Download, Plus, FileText, Image as ImageIcon, File } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { Attachment } from '../../types';
+import { Attachment } from '../../core/types';
 
 interface AttachmentsManagerProps {
     entityId: string;

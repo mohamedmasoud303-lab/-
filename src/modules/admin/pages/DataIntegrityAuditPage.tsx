@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { AuditIssue } from '../../../types';
-import Card from '../../../components/ui/Card';
+import { useApp } from 'contexts/AppContext';
+import { AuditIssue } from 'core/types';
+import Card from 'components/ui/Card';
 import { AlertTriangle, AlertCircle, Info, RefreshCw, ChevronsRight, SearchCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { runDataIntegrityAudit } from '../../../services/audit/auditEngine';
+import { runDataIntegrityAudit } from 'services/audit/auditEngine';
 
 const IssueCard: React.FC<{ issue: AuditIssue }> = ({ issue }) => {
     const icons = {

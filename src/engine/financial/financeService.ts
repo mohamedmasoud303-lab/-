@@ -1,7 +1,7 @@
 
 import { toast } from 'react-hot-toast';
 import { dbEngine } from '../../services/api/db';
-import { Database, JournalEntry, Receipt, Invoice, User, Settings, Commission, Expense, OwnerSettlement } from '../../types';
+import { Database, JournalEntry, Receipt, Invoice, User, Settings, Commission, Expense, OwnerSettlement } from '../../core/types';
 import { dataService } from '../../services/api/dataService';
 import { postJournalEntry, rebuildSnapshotsFromJournal } from './financialEngine';
 import { formatCurrency, getLocalISODate, getLocalISOMonth } from '../../utils/helpers';

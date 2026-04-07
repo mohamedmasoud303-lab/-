@@ -4,7 +4,7 @@ import Modal from '../ui/Modal';
 import { templates } from '../../services/integrations/whatsappService';
 import { Send } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { Tenant, Receipt } from '../../types';
+import { Tenant, Receipt } from '../../core/types';
 import { toast } from 'react-hot-toast';
 
 interface ComposerContext {
@@ -129,3 +129,5 @@ export const WhatsAppComposerModal: React.FC<WhatsAppComposerModalProps> = ({ is
         </Modal>
     );
 };
+
+export default WhatsAppComposerModal;

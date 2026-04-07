@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { formatCurrency, toArabicDigits, formatDate } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { formatCurrency, toArabicDigits, formatDate } from 'utils/helpers';
 import { useNavigate } from 'react-router-dom';
 import { 
   Building2, Users, FileText, Receipt, Wrench, 
@@ -10,9 +10,9 @@ import {
   LayoutDashboard, BarChart3, PieChart as PieChartIcon,
   Briefcase, DollarSign, Home
 } from 'lucide-react';
-import PageHeader from '../../../components/ui/PageHeader';
-import Card from '../../../components/ui/Card';
-import SummaryStatCard from '../../../components/ui/SummaryStatCard';
+import PageHeader from 'components/ui/PageHeader';
+import Card from 'components/ui/Card';
+import SummaryStatCard from 'components/ui/SummaryStatCard';
 import PerformanceRankList from '../components/PerformanceRankList';
 import RiskRadarItem from '../components/RiskRadarItem';
 import { 

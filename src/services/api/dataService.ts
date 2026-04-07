@@ -4,6 +4,7 @@ import { dbEngine } from './db';
 import { postJournalEntry, rebuildSnapshotsFromJournal } from '../../engine/financial/financialEngine';
 import { Database, Serials, User, Receipt, Expense, OwnerSettlement, Settings, Invoice, Owner } from '../../types';
 import { getLocalISODate } from '../../utils/helpers';
+import { logger } from '../../lib/logger';
 
 const STATIC_ID = 1;
 
@@ -131,7 +132,7 @@ const add = async <T extends keyof Database>(
         }
         return finalEntry;
     } catch (error) {
-        console.error("ERP Transaction Error:", error);
+        logger.error("ERP Transaction Error:", error);
         toast.error(error instanceof Error ? error.message : 'خطأ في المعالجة المالية.');
         return null;
     }

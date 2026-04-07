@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Receipt } from '../../../types';
+import { useApp } from 'contexts/AppContext';
+import { Receipt } from 'core/types';
 import { useLocation, useNavigate } from 'react-router-dom';
-import TableControls from '../../../components/shared/TableControls';
-import StatusPill from '../../../components/ui/StatusPill';
-import ActionsMenu, { EditAction, VoidAction, PrintAction } from '../../../components/shared/ActionsMenu';
+import TableControls from 'components/shared/TableControls';
+import StatusPill from 'components/ui/StatusPill';
+import ActionsMenu, { EditAction, VoidAction, PrintAction } from 'components/shared/ActionsMenu';
 import { MessageCircle } from 'lucide-react';
-import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from '../../../components/ui/Table';
-import { ConfirmDialog } from '../../../components/ui';
-import { formatCurrency, formatDateTime } from '../../../utils/helpers';
+import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from 'components/ui/Table';
+import { ConfirmDialog } from 'components/ui';
+import { formatCurrency, formatDateTime } from 'utils/helpers';
 import ReceiptAllocationModal from './ReceiptAllocationModal';
 import EditReceiptForm from './EditReceiptForm';
-import PrintPreviewModal from '../../../components/shared/PrintPreviewModal';
-import ReceiptPrintable from '../../../components/print/ReceiptPrintable';
-import { exportReceiptToPdf } from '../../../services/files/pdfService';
-import { WhatsAppComposerModal } from '../../../components/shared/WhatsAppComposerModal';
+import PrintPreviewModal from 'components/shared/PrintPreviewModal';
+import ReceiptPrintable from 'components/print/ReceiptPrintable';
+import { exportReceiptToPdf } from 'services/files/pdfService';
+import { WhatsAppComposerModal } from 'components/shared/WhatsAppComposerModal';
 
 const ReceiptsView: React.FC = () => {
     const { db, financeService } = useApp();

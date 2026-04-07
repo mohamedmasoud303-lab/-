@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../contexts/AppContext';
 import { Sparkles, Bot, User, X, Send } from 'lucide-react';
 import { queryAssistant } from '../../services/integrations/geminiService';
-import { ContractBalance } from '../../types';
+import { ContractBalance } from '../../core/types';
 
 interface Message {
     sender: 'user' | 'ai' | 'error';

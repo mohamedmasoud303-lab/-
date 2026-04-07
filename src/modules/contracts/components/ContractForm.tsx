@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Contract } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { Contract } from 'core/types';
+import Modal from 'components/ui/Modal';
 import { toast } from 'react-hot-toast';
-import AttachmentsManager from '../../../components/shared/AttachmentsManager';
+import AttachmentsManager from 'components/shared/AttachmentsManager';
 
 interface ContractFormProps {
     isOpen: boolean;

@@ -1,4 +1,8 @@
-import { Database, AuditIssue } from '../../types';
+import { 
+    Database, AuditIssue, Property, Unit, Contract, Tenant, 
+    Receipt, Expense, OwnerSettlement, Invoice, JournalEntry, 
+    Account, ReceiptAllocation, MaintenanceRecord, Owner 
+} from 'core/types';
 
 const ENTITY_PATHS: { [key in keyof Database]?: string } = {
     properties: '/properties',
@@ -18,7 +22,7 @@ const createIssue = (
     title: string,
     description: string,
     entityType?: AuditIssue['entityType'],
-    entity?: { id: string, [key: string]: any }
+    entity?: { id: string, no?: string, name?: string, [key: string]: any }
 ): AuditIssue => {
     let entityIdentifier = '';
     if (entity) {
@@ -35,7 +39,7 @@ const createIssue = (
         entityType,
         entityId: entity?.id,
         entityIdentifier,
-        resolutionPath: entityType ? ENTITY_PATHS[entityType as keyof Database] as string : undefined,
+        resolutionPath: entityType ? ENTITY_PATHS[entityType] : undefined,
     };
 };
 
@@ -47,38 +51,44 @@ export const runDataIntegrityAudit = (db: Database): AuditIssue[] => {
         ...{
             owners: [], properties: [], units: [], tenants: [], contracts: [], invoices: [],
             receipts: [], expenses: [], maintenanceRecords: [], receiptAllocations: [],
-            journalEntries: [], accounts: [], settings: {} as any
+            journalEntries: [], accounts: [], settings: {} as any, auth: { users: [] },
+            depositTxs: [], auditLog: [], governance: {} as any, ownerSettlements: [],
+            serials: {} as any, snapshots: [], autoBackups: [], ownerBalances: [],
+            accountBalances: [], kpiSnapshots: [], contractBalances: [], tenantBalances: [],
+            notificationTemplates: [], outgoingNotifications: [], appNotifications: [],
+            leads: [], lands: [], commissions: [], missions: [], budgets: [],
+            attachments: [], utilityServices: []
         },
         ...db
     };
 
     // --- Create Maps for efficient lookups ---
-    const owners = new Map(dbSafe.owners.map((i: any) => [i.id, i]));
-    const properties = new Map(dbSafe.properties.map((i: any) => [i.id, i]));
-    const units = new Map(dbSafe.units.map((i: any) => [i.id, i]));
-    const tenants = new Map(dbSafe.tenants.map((i: any) => [i.id, i]));
-    const contracts = new Map(dbSafe.contracts.map((i: any) => [i.id, i]));
-    const invoices = new Map(dbSafe.invoices.map((i: any) => [i.id, i]));
-    const receipts = new Map(dbSafe.receipts.map((i: any) => [i.id, i]));
+    const owners = new Map(dbSafe.owners.map((i: Owner) => [i.id, i]));
+    const properties = new Map(dbSafe.properties.map((i: Property) => [i.id, i]));
+    const units = new Map(dbSafe.units.map((i: Unit) => [i.id, i]));
+    const tenants = new Map(dbSafe.tenants.map((i: Tenant) => [i.id, i]));
+    const contracts = new Map(dbSafe.contracts.map((i: Contract) => [i.id, i]));
+    const invoices = new Map(dbSafe.invoices.map((i: Invoice) => [i.id, i]));
+    const receipts = new Map(dbSafe.receipts.map((i: Receipt) => [i.id, i]));
 
     // ===========================================
     // SECTION 1: CRITICAL ERRORS (Referential Integrity)
     // ===========================================
-    dbSafe.properties.forEach((p: any) => !owners.has(p.ownerId) && issues.push(createIssue('ERROR', 'عقار بمالك غير صالح', `العقار "${p.name}" مرتبط بمعرّف مالك غير موجود. هذا سيؤدي إلى فشل في حساب كشوفات المالك والتقارير المالية.`, 'properties', p)));
-    dbSafe.units.forEach((u: any) => !properties.has(u.propertyId) && issues.push(createIssue('ERROR', 'وحدة بعقار غير صالح', `الوحدة "${u.name}" مرتبطة بمعرّف عقار غير موجود. لن تظهر هذه الوحدة في أي مكان.`, 'units', u)));
-    dbSafe.contracts.forEach((c: any) => {
+    dbSafe.properties.forEach((p: Property) => !owners.has(p.ownerId) && issues.push(createIssue('ERROR', 'عقار بمالك غير صالح', `العقار "${p.name}" مرتبط بمعرّف مالك غير موجود. هذا سيؤدي إلى فشل في حساب كشوفات المالك والتقارير المالية.`, 'properties', p)));
+    dbSafe.units.forEach((u: Unit) => !properties.has(u.propertyId) && issues.push(createIssue('ERROR', 'وحدة بعقار غير صالح', `الوحدة "${u.name}" مرتبطة بمعرّف عقار غير موجود. لن تظهر هذه الوحدة في أي مكان.`, 'units', u)));
+    dbSafe.contracts.forEach((c: Contract) => {
         if (!units.has(c.unitId)) issues.push(createIssue('ERROR', 'عقد بوحدة غير صالحة', `العقد المرتبط بالمستأجر "${tenants.get(c.tenantId)?.name}" مرتبط بوحدة غير موجودة.`, 'contracts', c));
         if (!tenants.has(c.tenantId)) issues.push(createIssue('ERROR', 'عقد بمستأجر غير صالح', `عقد الوحدة "${units.get(c.unitId)?.name}" مرتبط بمستأجر غير موجود.`, 'contracts', c));
     });
-    dbSafe.receipts.forEach((r: any) => !contracts.has(r.contractId) && issues.push(createIssue('ERROR', 'سند قبض بعقد غير صالح', `سند القبض رقم "${r.no}" مرتبط بعقد غير موجود. لن يتم احتساب هذا المبلغ في أي تقرير.`, 'receipts', r)));
-    dbSafe.expenses.forEach((e: any) => e.contractId && !contracts.has(e.contractId) && issues.push(createIssue('ERROR', 'مصروف بعقد غير صالح', `المصروف رقم "${e.no}" مرتبط بعقد غير موجود.`, 'expenses', e)));
-    dbSafe.receiptAllocations.forEach((ra: any) => {
+    dbSafe.receipts.forEach((r: Receipt) => !contracts.has(r.contractId) && issues.push(createIssue('ERROR', 'سند قبض بعقد غير صالح', `سند القبض رقم "${r.no}" مرتبط بعقد غير موجود. لن يتم احتساب هذا المبلغ في أي تقرير.`, 'receipts', r)));
+    dbSafe.expenses.forEach((e: Expense) => e.contractId && !contracts.has(e.contractId) && issues.push(createIssue('ERROR', 'مصروف بعقد غير صالح', `المصروف رقم "${e.no}" مرتبط بعقد غير موجود.`, 'expenses', e)));
+    dbSafe.receiptAllocations.forEach((ra: ReceiptAllocation) => {
         if (!receipts.has(ra.receiptId)) issues.push(createIssue('ERROR', 'تخصيص سند غير صالح', `يوجد تخصيص مالي مرتبط بسند قبض محذوف أو غير صالح (ReceiptID: ${ra.receiptId.slice(0,8)}).`, 'receipts'));
         if (!invoices.has(ra.invoiceId)) issues.push(createIssue('ERROR', 'تخصيص فاتورة غير صالحة', `يوجد تخصيص مالي مرتبط بفاتورة محذوفة أو غير صالحة (InvoiceID: ${ra.invoiceId.slice(0,8)}).`, 'invoices'));
     });
-    dbSafe.journalEntries.forEach((je: any) => {
-        if(!dbSafe.accounts.find((acc: any) => acc.id === je.accountId)) {
-             issues.push(createIssue('ERROR', 'قيد يومية بحساب غير صالح', `القيد رقم "${je.no}" يحتوي على حركة على حساب محذوف أو غير صالح (AccountID: ${je.accountId}). هذا يسبب عدم توازن في ميزان المراجعة.`, 'journalEntries', je));
+    dbSafe.journalEntries.forEach((je: JournalEntry) => {
+        if(!dbSafe.accounts.find((acc: Account) => acc.id === je.accountId)) {
+            issues.push(createIssue('ERROR', 'قيد يومية بحساب غير صالح', `القيد رقم "${je.no}" يحتوي على حركة على حساب محذوف أو غير صالح (AccountID: ${je.accountId}). هذا يسبب عدم توازن في ميزان المراجعة.`, 'journalEntries', je));
         }
     });
 
@@ -86,26 +96,26 @@ export const runDataIntegrityAudit = (db: Database): AuditIssue[] => {
     // ===========================================
     // SECTION 2: WARNINGS (Data Flow & Quality)
     // ===========================================
-    dbSafe.maintenanceRecords.forEach((mr: any) => {
+    dbSafe.maintenanceRecords.forEach((mr: MaintenanceRecord) => {
         if (['COMPLETED', 'CLOSED'].includes(mr.status) && mr.cost > 0 && !mr.expenseId && !mr.invoiceId) {
             issues.push(createIssue('WARNING', 'انقطاع التدفق المالي للصيانة', `طلب الصيانة المكتمل #${mr.no} بتكلفة ${mr.cost} لم يتم إنشاء مصروف أو فاتورة له. التكلفة لن تنعكس في أي تقرير مالي.`, 'maintenanceRecords', mr));
         }
     });
-    dbSafe.contracts.forEach((c: any) => {
+    dbSafe.contracts.forEach((c: Contract) => {
         if (c.status === 'ACTIVE' && c.rent <= 0) {
             issues.push(createIssue('WARNING', 'عقد نشط بإيجار صفري', `عقد المستأجر "${tenants.get(c.tenantId)?.name}" نشط ولكن قيمة الإيجار صفر. لن يتم إنشاء فواتير صحيحة لهذا العقد.`, 'contracts', c));
         }
     });
-    dbSafe.receipts.forEach((r: any) => {
-        if (r.status === 'POSTED' && r.amount > 0 && !dbSafe.receiptAllocations.some((ra: any) => ra.receiptId === r.id)) {
+    dbSafe.receipts.forEach((r: Receipt) => {
+        if (r.status === 'POSTED' && r.amount > 0 && !dbSafe.receiptAllocations.some((ra: ReceiptAllocation) => ra.receiptId === r.id)) {
             issues.push(createIssue('WARNING', 'سند قبض غير مخصص', `سند القبض #${r.no} بمبلغ ${r.amount} تم ترحيله ولكنه لم يخصص لأي فاتورة. المبلغ لن يظهر كرصيد مدفوع للمستأجر.`, 'receipts', r));
         }
     });
-    const postedReceiptsWithoutJE = dbSafe.receipts.filter((r: any) => r.status === 'POSTED' && !dbSafe.journalEntries.some((je: any) => je.sourceId === r.id));
+    const postedReceiptsWithoutJE = dbSafe.receipts.filter((r: Receipt) => r.status === 'POSTED' && !dbSafe.journalEntries.some((je: JournalEntry) => je.sourceId === r.id));
     if(postedReceiptsWithoutJE.length > 0) {
         issues.push(createIssue('WARNING', 'سندات قبض بدون قيود يومية', `تم العثور على ${postedReceiptsWithoutJE.length} سندات قبض مرحّلة لا يوجد لها قيود يومية. هذا سيؤدي إلى عدم صحة ميزان المراجعة والتقارير المحاسبية.`, 'journalEntries', postedReceiptsWithoutJE[0]));
     }
-    const postedExpensesWithoutJE = dbSafe.expenses.filter((e: any) => e.status === 'POSTED' && !dbSafe.journalEntries.some((je: any) => je.sourceId === e.id));
+    const postedExpensesWithoutJE = dbSafe.expenses.filter((e: Expense) => e.status === 'POSTED' && !dbSafe.journalEntries.some((je: JournalEntry) => je.sourceId === e.id));
      if(postedExpensesWithoutJE.length > 0) {
         issues.push(createIssue('WARNING', 'مصروفات بدون قيود يومية', `تم العثور على ${postedExpensesWithoutJE.length} مصروفات مرحّلة لا يوجد لها قيود يومية. هذا سيؤدي إلى عدم صحة ميزان المراجعة والتقارير المحاسبية.`, 'journalEntries', postedExpensesWithoutJE[0]));
     }
@@ -114,16 +124,16 @@ export const runDataIntegrityAudit = (db: Database): AuditIssue[] => {
     // ===========================================
     // SECTION 3: INFO (Reasons for empty reports)
     // ===========================================
-    const hasPostedReceipts = dbSafe.receipts.some((r: any) => r.status === 'POSTED' && r.amount > 0);
-    const hasPostedExpenses = dbSafe.expenses.some((e: any) => e.status === 'POSTED' && e.amount > 0);
+    const hasPostedReceipts = dbSafe.receipts.some((r: Receipt) => r.status === 'POSTED' && r.amount > 0);
+    const hasPostedExpenses = dbSafe.expenses.some((e: Expense) => e.status === 'POSTED' && e.amount > 0);
     
     if (!hasPostedReceipts && !hasPostedExpenses) {
         issues.push(createIssue('INFO', 'لا توجد حركات مالية مرحّلة', `جميع التقارير المالية (كشوف الحساب، الأرباح والخسائر) تعتمد على السندات والمصروفات التي حالتها "مرحّل". النظام لا يحتوي على أي حركات مرحّلة حاليًا، مما يؤدي إلى ظهور التقارير فارغة.`, 'receipts'));
     }
 
     if (dbSafe.invoices.length > 0 && dbSafe.receipts.length > 0 && dbSafe.expenses.length > 0) {
-        const allTransactionDates = [...dbSafe.receipts.map((r: any) => new Date(r.dateTime)), ...dbSafe.expenses.map((e: any) => new Date(e.dateTime))];
-        const latestTransaction = new Date(Math.max.apply(null, allTransactionDates.map((d: any) => d.getTime())));
+        const allTransactionDates = [...dbSafe.receipts.map((r: Receipt) => new Date(r.dateTime)), ...dbSafe.expenses.map((e: Expense) => new Date(e.dateTime))];
+        const latestTransaction = new Date(Math.max.apply(null, allTransactionDates.map((d: Date) => d.getTime())));
         
         const today = new Date();
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -133,7 +143,7 @@ export const runDataIntegrityAudit = (db: Database): AuditIssue[] => {
         }
     }
 
-    if (dbSafe.owners.length > 0 && dbSafe.owners.every((o: any) => o.commissionValue <= 0)) {
+    if (dbSafe.owners.length > 0 && dbSafe.owners.every((o: Owner) => o.commissionValue <= 0)) {
         issues.push(createIssue('INFO', 'عمولة المكتب غير محددة', `لم يتم تحديد أي عمولة للمكتب من الملاك. هذا سيؤدي إلى أن تكون إيرادات المكتب في تقرير الأرباح والخسائر صفرًا.`, 'owners'));
     }
 

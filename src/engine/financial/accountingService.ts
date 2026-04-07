@@ -1,5 +1,5 @@
 
-import { Database, Account, AgedDebt, JournalEntry, Invoice, Contract, Tenant } from '../../types';
+import { Database, Account, AgedDebt, JournalEntry, Invoice, Contract, Tenant } from '../../core/types';
 import { differenceInDays } from 'date-fns';
 
 const n = (val: any) => typeof val === 'number' && isFinite(val) ? val : 0;

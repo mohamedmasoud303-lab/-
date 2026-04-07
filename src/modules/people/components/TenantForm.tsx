@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Tenant } from '../../../types';
-import Modal from '../../../components/ui/Modal';
-import AttachmentsManager from '../../../components/shared/AttachmentsManager';
+import { useApp } from 'contexts/AppContext';
+import { Tenant } from 'core/types';
+import Modal from 'components/ui/Modal';
+import AttachmentsManager from 'components/shared/AttachmentsManager';
 import { toast } from 'react-hot-toast';
 import { Sparkles, BrainCircuit } from 'lucide-react';
-import { analyzeText } from '../../../services/integrations/geminiService';
+import { analyzeText } from 'services/integrations/geminiService';
 
 const TenantForm: React.FC<{ isOpen: boolean, onClose: () => void, tenant: Tenant | null }> = ({ isOpen, onClose, tenant }) => {
     const { dataService } = useApp();

@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { OwnerSettlement } from '../../../types';
-import TableControls from '../../../components/shared/TableControls';
-import StatusPill from '../../../components/ui/StatusPill';
-import ActionsMenu, { EditAction, VoidAction } from '../../../components/shared/ActionsMenu';
-import { formatCurrency, formatDate } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { OwnerSettlement } from 'core/types';
+import TableControls from 'components/shared/TableControls';
+import StatusPill from 'components/ui/StatusPill';
+import ActionsMenu, { EditAction, VoidAction } from 'components/shared/ActionsMenu';
+import { formatCurrency, formatDate } from 'utils/helpers';
 import OwnerSettlementForm from './OwnerSettlementForm';
 
 const OwnerSettlementsView: React.FC = () => {

@@ -1,6 +1,36 @@
 
 export type UserRole = 'ADMIN' | 'MANAGER' | 'USER';
 
+export interface Agent {
+  name: string;
+  role: string;
+  goals: string[];
+  tools: Tool[];
+}
+
+export interface Tool {
+  name: string;
+  description: string;
+  parameters: any;
+  execute: (args: any) => Promise<any>;
+}
+
+export interface AgentResult {
+  thought: string;
+  toolCalls?: any[];
+  response: string;
+  status: 'success' | 'error';
+}
+
+export interface SystemContext {
+  total_units: number;
+  active_contracts: number;
+  tenants_count: number;
+  overdue_invoices: number;
+  monthly_revenue: number;
+  timestamp: string;
+}
+
 export interface User {
   id: string;
   username: string;

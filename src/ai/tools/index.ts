@@ -1,9 +1,19 @@
 import { supabase } from '../../lib/supabase';
-import { Tool } from '../types';
+import { Tool } from '../../core/types';
 
 export const createInvoiceTool: Tool = {
   name: 'createInvoice',
   description: 'Creates a new invoice for a tenant based on contract details.',
+  parameters: {
+    type: 'object',
+    properties: {
+      contractId: { type: 'string' },
+      amount: { type: 'number' },
+      dueDate: { type: 'string' },
+      description: { type: 'string' }
+    },
+    required: ['contractId', 'amount', 'dueDate', 'description']
+  },
   execute: async (args: { contractId: string; amount: number; dueDate: string; description: string }) => {
     const { data, error } = await supabase
       .from('invoices')
@@ -26,6 +36,15 @@ export const createInvoiceTool: Tool = {
 export const sendReminderTool: Tool = {
   name: 'sendReminder',
   description: 'Sends a WhatsApp reminder to a tenant about an overdue invoice.',
+  parameters: {
+    type: 'object',
+    properties: {
+      tenantId: { type: 'string' },
+      invoiceId: { type: 'string' },
+      message: { type: 'string' }
+    },
+    required: ['tenantId', 'invoiceId', 'message']
+  },
   execute: async (args: { tenantId: string; invoiceId: string; message: string }) => {
     // This would typically call a WhatsApp service
     // For now, we log the action and update the audit log
@@ -47,6 +66,14 @@ export const sendReminderTool: Tool = {
 export const generateReportTool: Tool = {
   name: 'generateReport',
   description: 'Generates a financial performance report for a specific period.',
+  parameters: {
+    type: 'object',
+    properties: {
+      startDate: { type: 'string' },
+      endDate: { type: 'string' }
+    },
+    required: ['startDate', 'endDate']
+  },
   execute: async (args: { startDate: string; endDate: string }) => {
     const { data: invoices } = await supabase
       .from('invoices')
@@ -69,6 +96,13 @@ export const generateReportTool: Tool = {
 export const fetchTenantDataTool: Tool = {
   name: 'fetchTenantData',
   description: 'Fetches detailed information about a tenant, including active contracts and payment history.',
+  parameters: {
+    type: 'object',
+    properties: {
+      tenantId: { type: 'string' }
+    },
+    required: ['tenantId']
+  },
   execute: async (args: { tenantId: string }) => {
     const [tenant, contracts, invoices] = await Promise.all([
       supabase.from('tenants').select('*').eq('id', args.tenantId).single(),
@@ -87,6 +121,11 @@ export const fetchTenantDataTool: Tool = {
 export const detectOverdueInvoicesTool: Tool = {
   name: 'detectOverdueInvoices',
   description: 'Identifies all invoices that are past their due date and remain unpaid.',
+  parameters: {
+    type: 'object',
+    properties: {},
+    required: []
+  },
   execute: async () => {
     const today = new Date().toISOString().split('T')[0];
     const { data, error } = await supabase

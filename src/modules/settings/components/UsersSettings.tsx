@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { User, UserRole } from '../../../types';
-import Card from '../../../components/ui/Card';
-import ActionsMenu, { EditAction } from '../../../components/shared/ActionsMenu';
+import { useApp } from 'contexts/AppContext';
+import { User, UserRole } from 'core/types';
+import Card from 'components/ui/Card';
+import ActionsMenu, { EditAction } from 'components/shared/ActionsMenu';
 import { ShieldCheck, UserPlus, KeyRound } from 'lucide-react';
-import { formatDate } from '../../../utils/helpers';
+import { formatDate } from 'utils/helpers';
 import UserForm from './UserForm';
 
 const UsersSettings: React.FC = () => {
@@ -13,7 +13,7 @@ const UsersSettings: React.FC = () => {
     const [editingUser, setEditingUser] = useState<User | null>(null);
 
     const getRoleLabel = (role: UserRole) => {
-        const map = { ADMIN: 'مدير نظام', MANAGER: 'مشرف عمليات', USER: 'موظف إدخال' };
+        const map: Record<UserRole, string> = { ADMIN: 'مدير نظام', MANAGER: 'مشرف عمليات', USER: 'موظف إدخال' };
         return map[role] || role;
     };
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
-import { Property, Contract, Invoice, Receipt } from '../types';
+import { supabase } from 'lib/supabase';
+import { Property, Contract, Invoice, Receipt } from 'core/types';
 
 // Example: Fetching paginated properties
 export const useProperties = (page: number = 1, limit: number = 10) => {

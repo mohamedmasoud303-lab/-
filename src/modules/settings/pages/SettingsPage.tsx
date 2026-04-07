@@ -8,14 +8,14 @@ import {
 
 import PageHeader from '../../../components/ui/PageHeader';
 
-// Import sub-components
-import AuditLog from '../../admin/pages/AuditLogPage';
-import DataIntegrityAudit from '../../admin/pages/DataIntegrityAuditPage';
-import BackupManager from '../../admin/pages/BackupPage';
-import Diagnostics from '../../admin/pages/DiagnosticsPage';
-import CompanySettings from '../components/CompanySettings';
-import FinancialSettings from '../components/FinancialSettings';
-import UsersSettings from '../components/UsersSettings';
+// Lazy load sub-components for performance
+const AuditLog = React.lazy(() => import('../../admin/pages/AuditLogPage'));
+const DataIntegrityAudit = React.lazy(() => import('../../admin/pages/DataIntegrityAuditPage'));
+const BackupManager = React.lazy(() => import('../../admin/pages/BackupPage'));
+const Diagnostics = React.lazy(() => import('../../admin/pages/DiagnosticsPage'));
+const CompanySettings = React.lazy(() => import('../components/CompanySettings'));
+const FinancialSettings = React.lazy(() => import('../components/FinancialSettings'));
+const UsersSettings = React.lazy(() => import('../components/UsersSettings'));
 
 const Settings: React.FC = () => {
     const location = useLocation();
@@ -94,17 +94,23 @@ const Settings: React.FC = () => {
 
                 {/* Content Area */}
                 <div className="flex-1 min-w-0">
-                    {activeTab === 'general' && (
-                        <div className="space-y-6 animate-in fade-in duration-300">
-                            <CompanySettings />
-                            <FinancialSettings />
+                    <React.Suspense fallback={
+                        <div className="flex-1 flex items-center justify-center p-20">
+                            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                         </div>
-                    )}
-                    {activeTab === 'users' && <UsersSettings />}
-                    {activeTab === 'backup' && <BackupManager />}
-                    {activeTab === 'integrity' && <DataIntegrityAudit />}
-                    {activeTab === 'diagnostics' && <Diagnostics />}
-                    {activeTab === 'audit' && <AuditLog />}
+                    }>
+                        {activeTab === 'general' && (
+                            <div className="space-y-6 animate-in fade-in duration-300">
+                                <CompanySettings />
+                                <FinancialSettings />
+                            </div>
+                        )}
+                        {activeTab === 'users' && <UsersSettings />}
+                        {activeTab === 'backup' && <BackupManager />}
+                        {activeTab === 'integrity' && <DataIntegrityAudit />}
+                        {activeTab === 'diagnostics' && <Diagnostics />}
+                        {activeTab === 'audit' && <AuditLog />}
+                    </React.Suspense>
                 </div>
             </div>
         </div>

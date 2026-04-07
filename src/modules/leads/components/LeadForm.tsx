@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Lead } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { Lead } from 'core/types';
+import Modal from 'components/ui/Modal';
 import { toast } from 'react-hot-toast';
 
 const LeadForm: React.FC<{ isOpen: boolean, onClose: () => void, lead: Lead | null }> = ({ isOpen, onClose, lead }) => {

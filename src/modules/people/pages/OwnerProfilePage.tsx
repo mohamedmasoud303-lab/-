@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApp } from '../../../contexts/AppContext';
-import PageHeader from '../../../components/ui/PageHeader';
-import Card from '../../../components/ui/Card';
-import ExecutiveKpiCard from '../../../components/ui/ExecutiveKpiCard';
+import { useApp } from 'contexts/AppContext';
+import PageHeader from 'components/ui/PageHeader';
+import Card from 'components/ui/Card';
+import ExecutiveKpiCard from 'components/ui/ExecutiveKpiCard';
 import { ArrowLeft, Building, DollarSign, BookOpen, Link as LinkIcon, Users, Wallet, TrendingUp, AlertCircle } from 'lucide-react';
-import { formatCurrency } from '../../../utils/helpers';
-import StatusPill from '../../../components/ui/StatusPill';
+import { formatCurrency } from 'utils/helpers';
+import StatusPill from 'components/ui/StatusPill';
 import { toast } from 'react-hot-toast';
 import { motion } from 'motion/react';
 

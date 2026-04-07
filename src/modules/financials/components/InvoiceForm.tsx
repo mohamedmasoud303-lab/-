@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Invoice } from '../../../types';
-import Modal from '../../../components/ui/Modal';
+import { useApp } from 'contexts/AppContext';
+import { Invoice } from 'core/types';
+import Modal from 'components/ui/Modal';
 import { toast } from 'react-hot-toast';
 
 const InvoiceForm: React.FC<{ isOpen: boolean, onClose: () => void, invoice: Invoice | null }> = ({ isOpen, onClose, invoice }) => {

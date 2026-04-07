@@ -1,12 +1,13 @@
 
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { OutgoingNotification } from '../../../types';
-import Card from '../../../components/ui/Card';
-import { sanitizePhoneNumber } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { OutgoingNotification } from 'core/types';
+import Card from 'components/ui/Card';
+import { sanitizePhoneNumber } from 'utils/helpers';
 import { Send, MessageSquare, Copy, Check, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusPill from 'components/ui/StatusPill';
+import { logger } from 'lib/logger';
 
 const CommunicationHub: React.FC = () => {
     const { db, generateNotifications, dataService } = useApp();
@@ -21,7 +22,7 @@ const CommunicationHub: React.FC = () => {
             const count = await generateNotifications();
             toast.success(`تم توليد ${count} إشعار جديد.`);
         } catch (error) {
-            console.error("Failed to generate notifications:", error);
+            logger.error("Failed to generate notifications:", error);
             toast.error(`فشل توليد الإشعارات: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`);
         } finally {
             setIsLoading(false);

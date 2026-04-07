@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../../contexts/AppContext';
 import { Mail, Lock, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { logger } from '../../../lib/logger';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('admin@rentrix.local');
@@ -21,7 +22,7 @@ const Login: React.FC = () => {
         setError(res.msg);
       }
     } catch (err) {
-      console.error("Login error:", err);
+      logger.error("Login error:", err);
       setError('حدث خطأ غير متوقع أثناء تسجيل الدخول.');
     } finally {
       setIsLoading(false);

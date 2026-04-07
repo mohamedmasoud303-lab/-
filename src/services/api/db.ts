@@ -1,8 +1,28 @@
 import { supabase } from '../../lib/supabase';
 import { Database } from '../../types';
+import { logger } from '../../lib/logger';
 
-// This file now acts as a bridge to Supabase, mimicking the Dexie API
-// to minimize changes in the rest of the application logic.
+// Helper functions for snake_case <-> camelCase conversion
+function toSnakeCase(str: string): string {
+  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+}
+
+function toCamelCase(str: string): string {
+  return str.replace(/_([a-z])/g, g => g[1].toUpperCase());
+}
+
+function transformKeys(obj: any, transformer: (s: string) => string): any {
+  if (obj === null || typeof obj !== 'object' || obj instanceof Date) return obj;
+  if (Array.isArray(obj)) return obj.map(v => transformKeys(v, transformer));
+  
+  const newObj: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    // Don't transform keys that look like IDs or are already transformed
+    const newKey = transformer(key);
+    newObj[newKey] = transformKeys(value, transformer);
+  }
+  return newObj;
+}
 
 class SupabaseTableWrapper {
   constructor(public tableName: string) {}
@@ -14,7 +34,7 @@ class SupabaseTableWrapper {
       .eq('id', id)
       .maybeSingle();
     if (error) return null;
-    return data;
+    return transformKeys(data, toCamelCase);
   }
 
   async toArray() {
@@ -22,13 +42,14 @@ class SupabaseTableWrapper {
       .from(this.tableName)
       .select('*');
     if (error) return [];
-    return data || [];
+    return transformKeys(data || [], toCamelCase);
   }
 
   async add(item: any) {
+    const snakeItem = transformKeys(item, toSnakeCase);
     const { data, error } = await supabase
       .from(this.tableName)
-      .insert(item)
+      .insert(snakeItem)
       .select()
       .single();
     if (error) throw error;
@@ -36,12 +57,13 @@ class SupabaseTableWrapper {
   }
 
   async bulkAdd(items: any[]) {
+    const snakeItems = items.map(item => transformKeys(item, toSnakeCase));
     const { data, error } = await supabase
       .from(this.tableName)
-      .insert(items)
+      .insert(snakeItems)
       .select();
     if (error) throw error;
-    return data;
+    return transformKeys(data, toCamelCase);
   }
 
   async bulkGet(ids: any[]) {
@@ -50,13 +72,14 @@ class SupabaseTableWrapper {
       .select('*')
       .in('id', ids);
     if (error) return [];
-    return data || [];
+    return transformKeys(data || [], toCamelCase);
   }
 
   async put(item: any) {
+    const snakeItem = transformKeys(item, toSnakeCase);
     const { data, error } = await supabase
       .from(this.tableName)
-      .upsert(item)
+      .upsert(snakeItem)
       .select()
       .single();
     if (error) throw error;
@@ -64,23 +87,25 @@ class SupabaseTableWrapper {
   }
 
   async bulkPut(items: any[]) {
+    const snakeItems = items.map(item => transformKeys(item, toSnakeCase));
     const { data, error } = await supabase
       .from(this.tableName)
-      .upsert(items)
+      .upsert(snakeItems)
       .select();
     if (error) throw error;
-    return data;
+    return transformKeys(data, toCamelCase);
   }
 
   async update(id: any, updates: any) {
+    const snakeUpdates = transformKeys(updates, toSnakeCase);
     const { data, error } = await supabase
       .from(this.tableName)
-      .update(updates)
+      .update(snakeUpdates)
       .eq('id', id)
       .select()
       .single();
     if (error) throw error;
-    return data;
+    return transformKeys(data, toCamelCase);
   }
 
   async delete(id: any) {
@@ -127,69 +152,71 @@ class SupabaseTableWrapper {
 
   where(field: string | Record<string, any>) {
     if (typeof field === 'string') {
+      const snakeField = toSnakeCase(field);
       return {
         equals: (value: any) => ({
           first: async () => {
             const { data, error } = await supabase
               .from(this.tableName)
               .select('*')
-              .eq(field, value)
+              .eq(snakeField, value)
               .maybeSingle();
             if (error) return null;
-            return data;
+            return transformKeys(data, toCamelCase);
           },
           toArray: async () => {
             const { data, error } = await supabase
               .from(this.tableName)
               .select('*')
-              .eq(field, value);
+              .eq(snakeField, value);
             if (error) return [];
-            return data || [];
+            return transformKeys(data || [], toCamelCase);
           }
         })
       };
     } else {
       // Handle object-based where: where({ field1: val1, field2: val2 })
+      const snakeField = transformKeys(field, toSnakeCase);
       return {
         first: async () => {
           let query = supabase.from(this.tableName).select('*');
-          for (const [key, val] of Object.entries(field)) {
+          for (const [key, val] of Object.entries(snakeField)) {
             query = query.eq(key, val);
           }
           const { data, error } = await query.maybeSingle();
           if (error) return null;
-          return data;
+          return transformKeys(data, toCamelCase);
         },
         toArray: async () => {
           let query = supabase.from(this.tableName).select('*');
-          for (const [key, val] of Object.entries(field)) {
+          for (const [key, val] of Object.entries(snakeField)) {
             query = query.eq(key, val);
           }
           const { data, error } = await query;
           if (error) return [];
-          return data || [];
+          return transformKeys(data || [], toCamelCase);
         },
         filter: (callback: (item: any) => boolean) => {
-          // This is a bit tricky to do efficiently in Supabase, 
-          // but for compatibility we can fetch and then filter.
           return {
             first: async () => {
               let query = supabase.from(this.tableName).select('*');
-              for (const [key, val] of Object.entries(field)) {
+              for (const [key, val] of Object.entries(snakeField)) {
                 query = query.eq(key, val);
               }
               const { data, error } = await query;
               if (error || !data) return null;
-              return data.find(callback) || null;
+              const camelData = transformKeys(data, toCamelCase);
+              return camelData.find(callback) || null;
             },
             toArray: async () => {
               let query = supabase.from(this.tableName).select('*');
-              for (const [key, val] of Object.entries(field)) {
+              for (const [key, val] of Object.entries(snakeField)) {
                 query = query.eq(key, val);
               }
               const { data, error } = await query;
               if (error || !data) return [];
-              return data.filter(callback);
+              const camelData = transformKeys(data, toCamelCase);
+              return camelData.filter(callback);
             }
           };
         }
@@ -208,33 +235,38 @@ const tablesMap: Record<string, SupabaseTableWrapper> = {
   contracts: new SupabaseTableWrapper('contracts'),
   invoices: new SupabaseTableWrapper('invoices'),
   receipts: new SupabaseTableWrapper('receipts'),
-  receiptAllocations: new SupabaseTableWrapper('receiptAllocations'),
+  receiptAllocations: new SupabaseTableWrapper('receipt_allocations'),
   expenses: new SupabaseTableWrapper('expenses'),
-  maintenanceRecords: new SupabaseTableWrapper('maintenanceRecords'),
-  depositTxs: new SupabaseTableWrapper('depositTxs'),
-  auditLog: new SupabaseTableWrapper('auditLog'),
+  maintenanceRecords: new SupabaseTableWrapper('maintenance_records'),
+  depositTxs: new SupabaseTableWrapper('deposit_transactions'),
+  auditLog: new SupabaseTableWrapper('audit_logs'),
   governance: new SupabaseTableWrapper('governance'),
-  ownerSettlements: new SupabaseTableWrapper('ownerSettlements'),
+  ownerSettlements: new SupabaseTableWrapper('owner_settlements'),
   serials: new SupabaseTableWrapper('serials'),
   snapshots: new SupabaseTableWrapper('snapshots'),
   accounts: new SupabaseTableWrapper('accounts'),
-  journalEntries: new SupabaseTableWrapper('journalEntries'),
-  autoBackups: new SupabaseTableWrapper('autoBackups'),
-  ownerBalances: new SupabaseTableWrapper('ownerBalances'),
-  accountBalances: new SupabaseTableWrapper('accountBalances'),
-  kpiSnapshots: new SupabaseTableWrapper('kpiSnapshots'),
-  contractBalances: new SupabaseTableWrapper('contractBalances'),
-  tenantBalances: new SupabaseTableWrapper('tenantBalances'),
-  notificationTemplates: new SupabaseTableWrapper('notificationTemplates'),
-  outgoingNotifications: new SupabaseTableWrapper('outgoingNotifications'),
-  appNotifications: new SupabaseTableWrapper('appNotifications'),
+  journalEntries: new SupabaseTableWrapper('journal_entries'),
+  autoBackups: new SupabaseTableWrapper('auto_backups'),
+  ownerBalances: new SupabaseTableWrapper('owner_balances'),
+  accountBalances: new SupabaseTableWrapper('account_balances'),
+  kpiSnapshots: new SupabaseTableWrapper('kpi_snapshots'),
+  contractBalances: new SupabaseTableWrapper('contract_balances'),
+  tenantBalances: new SupabaseTableWrapper('tenant_balances'),
+  notificationTemplates: new SupabaseTableWrapper('notification_templates'),
+  outgoingNotifications: new SupabaseTableWrapper('outgoing_notifications'),
+  appNotifications: new SupabaseTableWrapper('app_notifications'),
   leads: new SupabaseTableWrapper('leads'),
   lands: new SupabaseTableWrapper('lands'),
   commissions: new SupabaseTableWrapper('commissions'),
   missions: new SupabaseTableWrapper('missions'),
   budgets: new SupabaseTableWrapper('budgets'),
   attachments: new SupabaseTableWrapper('attachments'),
-  utilityServices: new SupabaseTableWrapper('utilityServices'),
+  utilityServices: new SupabaseTableWrapper('utility_services'),
+  // Views (Read-only)
+  viewPropertiesFull: new SupabaseTableWrapper('view_properties_full'),
+  viewUnitsFull: new SupabaseTableWrapper('view_units_full'),
+  viewTenantsFull: new SupabaseTableWrapper('view_tenants_full'),
+  viewAccountBalancesFull: new SupabaseTableWrapper('view_account_balances_full'),
 };
 
 export const dbEngine: any = {
@@ -278,12 +310,12 @@ export const dbEngine: any = {
   },
 
   initialize: async () => {
-    console.log("DEBUG: dbEngine.initialize started");
+    logger.debug("dbEngine.initialize started");
     try {
       const settingsCount = await dbEngine.settings.count();
-      console.log("DEBUG: dbEngine.settings.count completed, count:", settingsCount);
+      logger.debug("dbEngine.settings.count completed, count:", settingsCount);
       if (settingsCount === 0) {
-        console.log('DEBUG: Seeding initial data to Supabase...');
+        logger.info('Seeding initial data to Supabase...');
         
         await dbEngine.settings.add({
           id: 1, theme: 'light', currency: 'OMR', contractAlertDays: 30, taxRate: 0,
@@ -318,11 +350,11 @@ export const dbEngine: any = {
           { id: '5101', no: '5101', name: 'مصاريف صيانة عمومية', type: 'EXPENSE', isParent: false, parentId: null }
         ]);
         
-        console.log('DEBUG: Seeding completed.');
+        logger.info('Seeding completed.');
       }
-      console.log("DEBUG: dbEngine.initialize completed successfully");
+      logger.debug("dbEngine.initialize completed successfully");
     } catch (error) {
-      console.error('DEBUG: Error during Supabase initialization/seeding:', error);
+      logger.error('Error during Supabase initialization/seeding:', error);
     }
   }
 };

@@ -1,21 +1,21 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Invoice } from '../../../types';
-import Card from '../../../components/ui/Card';
-import { formatCurrency, formatDate } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Invoice } from 'core/types';
+import Card from 'components/ui/Card';
+import { formatCurrency, formatDate } from 'utils/helpers';
 import { ReceiptText, RefreshCw, AlertTriangle, DollarSign, Clock, Hash } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ConfirmDialog } from '../../../components/ui';
+import { ConfirmDialog } from 'components/ui';
 import { toast } from 'react-hot-toast';
-import ActionsMenu, { EditAction, VoidAction, PrintAction } from '../../../components/shared/ActionsMenu';
+import ActionsMenu, { EditAction, VoidAction, PrintAction } from 'components/shared/ActionsMenu';
 import InvoiceForm from '../components/InvoiceForm';
-import SummaryStatCard from '../../../components/ui/SummaryStatCard';
-import StatusPill from '../../../components/ui/StatusPill';
-import PrintPreviewModal from '../../../components/shared/PrintPreviewModal';
-import InvoicePrintable from '../../../components/print/InvoicePrintable';
-import { exportInvoiceToPdf } from '../../../services/files/pdfService';
-import TableControls from '../../../components/shared/TableControls';
+import SummaryStatCard from 'components/ui/SummaryStatCard';
+import StatusPill from 'components/ui/StatusPill';
+import PrintPreviewModal from 'components/shared/PrintPreviewModal';
+import InvoicePrintable from 'components/print/InvoicePrintable';
+import { exportInvoiceToPdf } from 'services/files/pdfService';
+import TableControls from 'components/shared/TableControls';
 
 const Invoices: React.FC = () => {
     const { db, financeService } = useApp();

@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Budget, BudgetItem } from '../../../types';
-import Card from '../../../components/ui/Card';
-import { formatCurrency } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Budget, BudgetItem } from 'core/types';
+import Card from 'components/ui/Card';
+import { formatCurrency } from 'utils/helpers';
 import { PieChart, PlusCircle, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 

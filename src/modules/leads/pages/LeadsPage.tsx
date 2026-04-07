@@ -1,17 +1,17 @@
 
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Lead } from '../../../types';
-import Card from '../../../components/ui/Card';
-import ActionsMenu, { EditAction, DeleteAction } from '../../../components/shared/ActionsMenu';
+import { useApp } from 'contexts/AppContext';
+import { Lead } from 'core/types';
+import Card from 'components/ui/Card';
+import ActionsMenu, { EditAction, DeleteAction } from 'components/shared/ActionsMenu';
 import { UserPlus, MessageCircle, Phone, Mail, UserCheck } from 'lucide-react';
-import { WhatsAppComposerModal } from '../../../components/shared/WhatsAppComposerModal';
+import { WhatsAppComposerModal } from 'components/shared/WhatsAppComposerModal';
 import { toast } from 'react-hot-toast';
 import LeadForm from '../components/LeadForm';
-import StatusPill from '../../../components/ui/StatusPill';
-import PageHeader from '../../../components/ui/PageHeader';
+import StatusPill from 'components/ui/StatusPill';
+import PageHeader from 'components/ui/PageHeader';
 import { useNavigate } from 'react-router-dom';
-import TableControls from '../../../components/shared/TableControls';
+import TableControls from 'components/shared/TableControls';
 
 const Leads: React.FC = () => {
     const { db, dataService } = useApp();

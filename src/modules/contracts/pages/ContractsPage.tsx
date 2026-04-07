@@ -1,24 +1,26 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useApp } from '../../../contexts/AppContext';
-import { Contract } from '../../../types';
-import { selectContractsWithDetails } from '../../../services/selectors';
-import Card from '../../../components/ui/Card';
-import ActionsMenu, { EditAction, DeleteAction, PrintAction } from '../../../components/shared/ActionsMenu';
-import { formatCurrency, toArabicDigits, formatDate } from '../../../utils/helpers';
+import { useApp } from 'contexts/AppContext';
+import { Contract } from 'core/types';
+import { selectContractsWithDetails } from 'services/selectors';
+import Card from 'components/ui/Card';
+import ActionsMenu, { EditAction, DeleteAction, PrintAction } from 'components/shared/ActionsMenu';
+import { formatCurrency, toArabicDigits, formatDate } from 'utils/helpers';
 import { FileText, PlusCircle, AlertTriangle, Clock, DollarSign, Repeat } from 'lucide-react';
-import PrintPreviewModal from '../../../components/shared/PrintPreviewModal';
-import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from '../../../components/ui/Table';
-import { ConfirmDialog } from '../../../components/ui';
+import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from 'components/ui/Table';
+import { ConfirmDialog } from 'components/ui';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { exportContractToPdf } from '../../../services/files/pdfService';
+import { exportContractToPdf } from 'services/files/pdfService';
 import { toast } from 'react-hot-toast';
-import SummaryStatCard from '../../../components/ui/SummaryStatCard';
-import StatusPill from '../../../components/ui/StatusPill';
-import ContractPrintable from '../../../components/print/ContractPrintable';
-import PageHeader from '../../../components/ui/PageHeader';
-import TableControls from '../../../components/shared/TableControls';
-import ContractForm from '../components/ContractForm';
+import SummaryStatCard from 'components/ui/SummaryStatCard';
+import StatusPill from 'components/ui/StatusPill';
+import PageHeader from 'components/ui/PageHeader';
+import TableControls from 'components/shared/TableControls';
+
+// Lazy load forms and modals for performance
+const ContractForm = React.lazy(() => import('../components/ContractForm'));
+const PrintPreviewModal = React.lazy(() => import('components/shared/PrintPreviewModal'));
+const ContractPrintable = React.lazy(() => import('components/print/ContractPrintable'));
 
 const Contracts: React.FC = () => {
     const { db, dataService, contractBalances, canAccess } = useApp();
@@ -205,7 +207,9 @@ const Contracts: React.FC = () => {
                     )}
                 </div>
             </Card>
-            <ContractForm isOpen={isModalOpen} onClose={handleCloseModal} contract={editingContract} defaultUnitId={defaultUnitId} />
+            <React.Suspense fallback={null}>
+                <ContractForm isOpen={isModalOpen} onClose={handleCloseModal} contract={editingContract} defaultUnitId={defaultUnitId} />
+            </React.Suspense>
             
             <ConfirmDialog
                 isOpen={!!confirmDelete}
@@ -215,23 +219,25 @@ const Contracts: React.FC = () => {
                 message={`هل أنت متأكد من حذف العقد "${confirmDelete?.name}"؟`}
             />
 
-            {printingContract && ( 
-                <PrintPreviewModal 
-                    isOpen={!!printingContract} 
-                    onClose={() => setPrintingContract(null)} 
-                    title={`معاينة طباعة العقد`}
-                    onExportPdf={() => {
-                        if (!db.settings || !printingContract) return;
-                        const tenant = db.tenants.find(t => t.id === printingContract.tenantId);
-                        const unit = db.units.find(u => u.id === printingContract.unitId);
-                        const property = unit ? db.properties.find(p => p.id === unit.propertyId) : undefined;
-                        const owner = property ? db.owners.find(o => o.id === property.ownerId) : undefined;
-                        exportContractToPdf(printingContract, tenant, unit, property, owner, db.settings);
-                    }}
-                >
-                    <ContractPrintable contract={printingContract} />
-                </PrintPreviewModal>
-            )}
+            <React.Suspense fallback={null}>
+                {printingContract && ( 
+                    <PrintPreviewModal 
+                        isOpen={!!printingContract} 
+                        onClose={() => setPrintingContract(null)} 
+                        title={`معاينة طباعة العقد`}
+                        onExportPdf={() => {
+                            if (!db.settings || !printingContract) return;
+                            const tenant = db.tenants.find(t => t.id === printingContract.tenantId);
+                            const unit = db.units.find(u => u.id === printingContract.unitId);
+                            const property = unit ? db.properties.find(p => p.id === unit.propertyId) : undefined;
+                            const owner = property ? db.owners.find(o => o.id === property.ownerId) : undefined;
+                            exportContractToPdf(printingContract, tenant, unit, property, owner, db.settings);
+                        }}
+                    >
+                        <ContractPrintable contract={printingContract} />
+                    </PrintPreviewModal>
+                )}
+            </React.Suspense>
         </div>
     );
 };

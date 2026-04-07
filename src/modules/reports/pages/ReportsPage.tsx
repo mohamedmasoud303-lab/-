@@ -9,17 +9,18 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import PageHeader from '../../../components/ui/PageHeader';
 import ReportCard from '../components/ReportCard';
-import OwnerStatementView from '../components/OwnerStatementView';
-import TenantStatementView from '../components/TenantStatementView';
-import UnitLedgerView from '../components/UnitLedgerView';
-import CollectionsReportView from '../components/CollectionsReportView';
-import MaintenanceReportView from '../components/MaintenanceReportView';
-import IncomeStatement from '../components/IncomeStatement';
-import BalanceSheet from '../components/BalanceSheet';
-import TrialBalance from '../components/TrialBalance';
-import AgingReportView from '../components/AgingReportView';
-import VacancyReportView from '../components/VacancyReportView';
-import PropertyStatementView from '../components/PropertyStatementView';
+// Lazy load report components for performance
+const OwnerStatementView = React.lazy(() => import('../components/OwnerStatementView'));
+const TenantStatementView = React.lazy(() => import('../components/TenantStatementView'));
+const UnitLedgerView = React.lazy(() => import('../components/UnitLedgerView'));
+const CollectionsReportView = React.lazy(() => import('../components/CollectionsReportView'));
+const MaintenanceReportView = React.lazy(() => import('../components/MaintenanceReportView'));
+const IncomeStatement = React.lazy(() => import('../components/IncomeStatement'));
+const BalanceSheet = React.lazy(() => import('../components/BalanceSheet'));
+const TrialBalance = React.lazy(() => import('../components/TrialBalance'));
+const AgingReportView = React.lazy(() => import('../components/AgingReportView'));
+const VacancyReportView = React.lazy(() => import('../components/VacancyReportView'));
+const PropertyStatementView = React.lazy(() => import('../components/PropertyStatementView'));
 
 type ReportTab = 'rent_roll' | 'owner' | 'tenant' | 'property' | 'income_statement' | 'trial_balance' | 'balance_sheet' | 'aging' | 'unit_ledger' | 'collections' | 'maintenance' | 'vacancy';
 
@@ -63,17 +64,23 @@ const Reports: React.FC = () => {
                         <ChevronLeft className="w-4 h-4" /> العودة لمركز التقارير
                     </button>
                     <Card className="min-h-[600px] p-0 rounded-3xl shadow-sm overflow-hidden">
-                        {activeTab === 'owner' && <OwnerStatementView />}
-                        {activeTab === 'property' && <PropertyStatementView />}
-                        {activeTab === 'tenant' && <TenantStatementView />}
-                        {activeTab === 'unit_ledger' && <UnitLedgerView />}
-                        {activeTab === 'collections' && <CollectionsReportView />}
-                        {activeTab === 'maintenance' && <MaintenanceReportView />}
-                        {activeTab === 'vacancy' && <VacancyReportView />}
-                        {activeTab === 'income_statement' && <IncomeStatement />}
-                        {activeTab === 'balance_sheet' && <BalanceSheet />}
-                        {activeTab === 'trial_balance' && <TrialBalance />}
-                        {activeTab === 'aging' && <AgingReportView />}
+                        <React.Suspense fallback={
+                            <div className="flex-1 flex items-center justify-center p-20">
+                                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        }>
+                            {activeTab === 'owner' && <OwnerStatementView />}
+                            {activeTab === 'property' && <PropertyStatementView />}
+                            {activeTab === 'tenant' && <TenantStatementView />}
+                            {activeTab === 'unit_ledger' && <UnitLedgerView />}
+                            {activeTab === 'collections' && <CollectionsReportView />}
+                            {activeTab === 'maintenance' && <MaintenanceReportView />}
+                            {activeTab === 'vacancy' && <VacancyReportView />}
+                            {activeTab === 'income_statement' && <IncomeStatement />}
+                            {activeTab === 'balance_sheet' && <BalanceSheet />}
+                            {activeTab === 'trial_balance' && <TrialBalance />}
+                            {activeTab === 'aging' && <AgingReportView />}
+                        </React.Suspense>
                     </Card>
                 </div>
             )}
