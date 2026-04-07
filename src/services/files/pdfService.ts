@@ -2,7 +2,7 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { cairoFontBase64 } from './cairoFontBase64';
-import { Settings, Contract, Database, Invoice, Expense, Receipt, MaintenanceRecord, Tenant, Unit, Property, Owner } from '../../types';
+import { Settings, Contract, Database, Invoice, Expense, Receipt, MaintenanceRecord, Tenant, Unit, Property, Owner } from '../../core/types';
 import { formatDate, formatCurrency } from '../../utils/helpers';
 import { tafneeta } from '../../utils/numberToArabic';
 

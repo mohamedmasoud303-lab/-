@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase';
-import { Database } from '../../types';
+import { Database } from '../../core/types';
 import { logger } from '../../lib/logger';
 
 // Helper functions for snake_case <-> camelCase conversion

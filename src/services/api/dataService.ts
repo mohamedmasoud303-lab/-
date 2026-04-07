@@ -2,7 +2,7 @@
 import { toast } from 'react-hot-toast';
 import { dbEngine } from './db';
 import { postJournalEntry, rebuildSnapshotsFromJournal } from '../../engine/financial/financialEngine';
-import { Database, Serials, User, Receipt, Expense, OwnerSettlement, Settings, Invoice, Owner } from '../../types';
+import { Database, Serials, User, Receipt, Expense, OwnerSettlement, Settings, Invoice, Owner } from '../../core/types';
 import { getLocalISODate } from '../../utils/helpers';
 import { logger } from '../../lib/logger';
 

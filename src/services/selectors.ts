@@ -1,5 +1,5 @@
 
-import { Database, Contract, Unit, Tenant, Property, MaintenanceRecord, DerivedData, UtilityService } from '../types';
+import { Database, Contract, Unit, Tenant, Property, MaintenanceRecord, DerivedData, UtilityService } from '../core/types';
 
 export const selectContractsWithDetails = (db: Database, contractBalances: DerivedData['contractBalances']) => {
   const alertDate = new Date();

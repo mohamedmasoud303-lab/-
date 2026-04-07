@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase';
-import { User } from '../../types';
+import { User } from '../../core/types';
 import { toast } from 'react-hot-toast';
 import { logger } from '../../lib/logger';
 
