@@ -105,6 +105,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const currentUser = appUser;
 
   const refreshTimeout = React.useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = React.useRef(true);
+  const refreshRequestIdRef = React.useRef(0);
 
   // Helper to call the backend
   const apiCall = useCallback(async (domain: string, action: string, payload?: any) => {
@@ -168,25 +170,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [db, currentUser]);
   
   const refreshData = useCallback(async () => {
+    const requestId = ++refreshRequestIdRef.current;
     logger.debug("refreshData started");
     try {
       await dbEngine.initialize();
       logger.debug("dbEngine.initialize completed");
       const allData = await dbEngine.getAllData();
       logger.debug("dbEngine.getAllData completed");
+      if (!isMountedRef.current || requestId !== refreshRequestIdRef.current) return;
       setDb(allData);
       setIsReady(true);
       logger.debug("refreshData completed successfully");
     } catch(e) {
       logger.error("Fatal: Could not load data from backend.", e);
+      if (!isMountedRef.current || requestId !== refreshRequestIdRef.current) return;
       setIsReady(true); // Ensure loading screen is removed even on error
     }
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
     if (!authLoading) {
       refreshData();
     }
+    return () => {
+      isMountedRef.current = false;
+      if (refreshTimeout.current) {
+        clearTimeout(refreshTimeout.current);
+      }
+    };
   }, [refreshData, version, authLoading]); // Re-fetch when version or auth state changes
 
   const contractBalances = useMemo(() => Object.fromEntries((db.contractBalances || []).map(b => [b.contractId, b])), [db.contractBalances]);

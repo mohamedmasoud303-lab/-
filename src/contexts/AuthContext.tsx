@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from 'lib/supabase';
 import { User as AppUser } from 'core/types';
@@ -18,8 +18,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMountedRef = useRef(true);
+  const profileRequestIdRef = useRef(0);
 
   const fetchProfile = async (userId: string, email?: string) => {
+    const requestId = ++profileRequestIdRef.current;
     console.log("DEBUG: fetchProfile started for user:", userId);
     const { data: profile, error } = await supabase
       .from('users')
@@ -34,16 +37,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let userProfile = profile;
     
     if (!userProfile) {
-      // Auto-create profile if it doesn't exist
       const { count, error: countError } = await supabase.from('users').select('*', { count: 'exact', head: true });
-      
       if (countError) {
         console.error("Failed to check users count in AuthContext (table might not exist):", countError);
         return;
       }
-
       const isFirstUser = count === 0;
-      
+
       const newUserProfile = {
         id: userId,
         username: email?.split('@')[0] || 'user',
@@ -51,20 +51,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         must_change: false
       };
 
-      const { data: newProfile, error: insertError } = await supabase
+      const { data: upsertedProfile, error: upsertError } = await supabase
         .from('users')
-        .insert(newUserProfile)
+        .upsert(newUserProfile, { onConflict: 'id' })
         .select()
         .maybeSingle();
 
-      if (insertError || !newProfile) {
-        console.error("Failed to create user profile in AuthContext:", insertError);
+      if (upsertError || !upsertedProfile) {
+        console.error("Failed to create user profile in AuthContext:", upsertError);
         return;
       }
-      userProfile = newProfile;
+      userProfile = upsertedProfile;
     }
 
-    if (userProfile) {
+    if (userProfile && isMountedRef.current && requestId === profileRequestIdRef.current) {
       setAppUser({
         id: userProfile.id,
         username: userProfile.username || email?.split('@')[0] || 'user',
@@ -80,9 +80,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     console.log("DEBUG: AuthContext useEffect started");
+    isMountedRef.current = true;
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       console.log("DEBUG: getSession completed, session:", !!session);
+      if (!isMountedRef.current) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -92,12 +94,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("DEBUG: AuthContext loading set to false");
     }).catch((e: any) => {
       console.error("DEBUG: getSession error:", e);
+      if (!isMountedRef.current) return;
       setLoading(false);
     });
 
     // Listen for changes on auth state (logged in, signed out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       console.log("DEBUG: onAuthStateChange event:", _event);
+      if (!isMountedRef.current) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -108,7 +112,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMountedRef.current = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {

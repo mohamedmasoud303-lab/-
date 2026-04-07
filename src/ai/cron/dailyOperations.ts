@@ -10,13 +10,19 @@ export const runDailyOperations = async () => {
     console.log(`Detected ${overdueInvoices.length} overdue invoices.`);
 
     // 2. Send reminders for each overdue invoice
+    let remindersSent = 0;
     for (const invoice of overdueInvoices) {
       if (invoice.tenants?.phone) {
-        await sendReminderTool.execute({
-          tenantId: invoice.tenantId,
-          invoiceId: invoice.id,
-          message: `Dear ${invoice.tenants.name}, your invoice for ${invoice.amount} is overdue. Please pay as soon as possible.`
-        });
+        try {
+          await sendReminderTool.execute({
+            tenantId: invoice.tenantId,
+            invoiceId: invoice.id,
+            message: `Dear ${invoice.tenants.name}, your invoice for ${invoice.amount} is overdue. Please pay as soon as possible.`
+          });
+          remindersSent += 1;
+        } catch (sendError) {
+          console.error(`Failed to send reminder for invoice ${invoice.id}:`, sendError);
+        }
       }
     }
 
@@ -28,13 +34,16 @@ export const runDailyOperations = async () => {
     });
 
     // 4. Log the autonomous task completion
-    await supabase.from('auditLog').insert([{
+    const { error: auditInsertError } = await supabase.from('auditLog').insert([{
       action: 'DAILY_CRON',
       tableName: 'system',
       recordId: 'daily-ops',
-      details: `Autonomous daily operations completed. Reminders sent: ${overdueInvoices.length}. Daily revenue: ${report.totalRevenue}`,
+      details: `Autonomous daily operations completed. Reminders sent: ${remindersSent}. Daily revenue: ${report.totalRevenue}`,
       timestamp: Date.now()
     }]);
+    if (auditInsertError) {
+      throw auditInsertError;
+    }
 
     console.log('Daily autonomous operations completed successfully.');
   } catch (error) {
